@@ -11,9 +11,11 @@ class Obstaculo {
     GLfloat y; 
 
     private:
-        void DesenhaRect(GLfloat height, GLfloat width,
+        void DesenhaRectHorizontal(GLfloat height, GLfloat width,
                         GLfloat R, GLfloat G, GLfloat B);
         void DesenhaObstaculo(GLfloat x, GLfloat y, GLfloat height, GLfloat width,
+                        GLfloat R, GLfloat G, GLfloat B);
+        void DesenhaRectVertical(GLfloat height, GLfloat width,
                         GLfloat R, GLfloat G, GLfloat B);
 
     public:

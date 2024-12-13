@@ -29,13 +29,13 @@ void init(void)
 {
     // ResetKeyStatus();
     // The color the windows will redraw. Its done to erase the previous frame.
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Black, no opacity(alpha).
+    glClearColor(0.f, 0.f, 0.f, 0.f); // Black, no opacity(alpha).
 
     glMatrixMode(GL_PROJECTION);  // Select the projection matrix
-    glOrtho(-(visDim / 2),  // X coordinate of left edge
-            (visDim / 2),   // X coordinate of right edge
-            -(visDim / 2), // Y coordinate of bottom edge
-            (visDim / 2),  // Y coordinate of top edge
+    glOrtho(0,  // X coordinate of left edge
+            500,   // X coordinate of right edge
+            -500, // Y coordinate of bottom edge
+            0,  // Y coordinate of top edge
             -100,                 // Z coordinate of the “near” plane
             100);                 // Z coordinate of the “far” plane
     glMatrixMode(GL_MODELVIEW);   // Select the projection matrix
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
     // Inicializa o jogo
     jogo.CarregarArquivoSVG("arena_teste.svg");
     visDim = jogo.getArenaHeight();
-    visDim = 600.0;
+    visDim = 1000;
     // Registra funções do GLUT
     glutDisplayFunc(display); // Função de renderização
     // glutKeyboardFunc(teclado); // Entrada do teclado

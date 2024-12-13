@@ -4,13 +4,15 @@
 #include <GL/glu.h>
 #include "obstaculo.h"
 #include <vector>
-
+#include "jogador.h"
 class Arena {
     GLfloat height;
     GLfloat width;
     GLfloat x;  
     GLfloat y;  
     std::vector<Obstaculo> obstaculos;
+    Jogador* jogador;
+    std::vector<Jogador> oponentes;
 
 
     private:
@@ -38,6 +40,15 @@ class Arena {
         void addObstaculo(GLfloat height, GLfloat width, GLfloat x, GLfloat y) {
             Obstaculo obstaculo = Obstaculo(height, width, x, y);
             this->obstaculos.push_back(obstaculo);
+        }
+
+        void addOponente(GLfloat x, GLfloat y, GLfloat size) {
+            Jogador oponente = Jogador(x, y, size);
+            this->oponentes.push_back(oponente);
+        }
+
+        void setJogador(Jogador* jogador) {
+            this->jogador = jogador;
         }
 
 

@@ -1,7 +1,6 @@
 #include "jogo.h"
 #include "tinyxml2.h"
 
-
 using namespace tinyxml2;
 
 
@@ -41,6 +40,22 @@ void Jogo::CarregarArquivoSVG(const char* caminho) {
             }
         }
         else if (strcmp(tag, "circle") == 0) {
+            const char* fill = element->Attribute("fill");
+            if (fill && std::string(fill) == "green") {
+                GLfloat x = element->FloatAttribute("cx");
+                GLfloat y = element->FloatAttribute("cy");
+                GLfloat raio = element->FloatAttribute("r");
+                Jogador* jogador = new Jogador(x, y, raio*2);
+                this->arena->setJogador(jogador);
+            }
+            else if (fill && std::string(fill) == "red") {
+                GLfloat x = element->FloatAttribute("cx");
+                GLfloat y = element->FloatAttribute("cy");
+                GLfloat raio = element->FloatAttribute("r");
+                Jogador* jogador = new Jogador(x, y, raio*2);
+                this->arena->addOponente(x, y, raio*2);
+            }
+
         }
 
 
