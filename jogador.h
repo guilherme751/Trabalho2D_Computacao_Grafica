@@ -28,6 +28,10 @@ class Jogador {
                 DesenhaOponente(this->x, this->y, this->size);
             }
         }
+        void MoveEmX(GLfloat dx);
+        GLfloat getX() {
+            return this->x;
+        }
 
 };
 

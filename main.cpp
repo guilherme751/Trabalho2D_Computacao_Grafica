@@ -9,11 +9,41 @@
 #include "jogo.h"
 #include "arena.h"
 
+#define INC_KEYIDLE 1
 // Window dimensions
-const GLint Width = 500;
-const GLint Height = 500;
+const GLint Width = 800;
+const GLint Height = 800;
 GLfloat visDim;
+GLfloat jogadorX;
 Jogo jogo;
+int keyStatus[256];
+
+void keyPress(unsigned char key, int x, int y) {
+    switch (key) { 
+        case 'a':
+        case 'A':
+            keyStatus[(int)('a')] = 1; 
+            break;
+        case 'd':
+        case 'D':
+            keyStatus[(int)('d')] = 1; 
+            break;
+
+    }
+    glutPostRedisplay();
+}
+
+void keyup(unsigned char key, int x, int y) {
+    keyStatus[(int)(key)] = 0;
+    glutPostRedisplay();
+}
+
+void ResetKeyStatus() {
+    int i;
+    // Initialize keyStatus
+    for (i = 0; i < 256; i++)
+        keyStatus[i] = 0;
+}
 
 void display() {
     glClear(GL_COLOR_BUFFER_BIT); // Limpa a tela
@@ -27,19 +57,34 @@ void display() {
 
 void init(void)
 {
-    // ResetKeyStatus();
+    
+    ResetKeyStatus();
     // The color the windows will redraw. Its done to erase the previous frame.
     glClearColor(0.f, 0.f, 0.f, 0.f); // Black, no opacity(alpha).
 
     glMatrixMode(GL_PROJECTION);  // Select the projection matrix
-    glOrtho(0,  // X coordinate of left edge
-            500,   // X coordinate of right edge
-            -500, // Y coordinate of bottom edge
+    glOrtho(jogadorX-visDim/2,  // X coordinate of left edge
+            jogadorX + visDim/2,   // X coordinate of right edge
+            -visDim, // Y coordinate of bottom edge
             0,  // Y coordinate of top edge
             -100,                 // Z coordinate of the “near” plane
             100);                 // Z coordinate of the “far” plane
     glMatrixMode(GL_MODELVIEW);   // Select the projection matrix
     glLoadIdentity();
+}
+void idle(void)
+{
+    double inc = INC_KEYIDLE; 
+    
+    if (keyStatus[(int)('a')])
+    {
+        jogo.getArena()->getJogador()->MoveEmX(-inc);
+    }
+    if (keyStatus[(int)('d')])
+    {
+        jogo.getArena()->getJogador()->MoveEmX(inc);
+    }
+    glutPostRedisplay();
 }
 
 int main(int argc, char** argv) {
@@ -50,10 +95,14 @@ int main(int argc, char** argv) {
     // Inicializa o jogo
     jogo.CarregarArquivoSVG("arena_teste.svg");
     visDim = jogo.getArenaHeight();
-    visDim = 1000;
+    jogadorX = jogo.getArena()->getJogador()->getX();
+    printf("%f", jogadorX);
+
     // Registra funções do GLUT
-    glutDisplayFunc(display); // Função de renderização
-    // glutKeyboardFunc(teclado); // Entrada do teclado
+    glutDisplayFunc(display); 
+    glutKeyboardFunc(keyPress);
+    glutIdleFunc(idle);
+    glutKeyboardUpFunc(keyup);    
     init();
     glutMainLoop();
     return 0;

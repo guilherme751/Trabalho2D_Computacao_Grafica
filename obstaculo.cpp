@@ -2,18 +2,6 @@
 #include <stdio.h>
 
 
-void Obstaculo::DesenhaRectHorizontal(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B) {
-    glColor3f(R, G, B);
-   
-    glBegin(GL_QUADS);
-        glVertex2f(0, height/2);
-        glVertex2f(0, -height/2);
-        glVertex2f(width, -height/2);
-        glVertex2f(width, height/2);
-    glEnd();
-
-}
-
 void Obstaculo::DesenhaRectVertical(GLfloat height, GLfloat width,
                         GLfloat R, GLfloat G, GLfloat B) {
     
@@ -35,8 +23,6 @@ void Obstaculo::DesenhaObstaculo(GLfloat x, GLfloat y, GLfloat height, GLfloat w
     glPushMatrix();
         glRotatef(180, 1, 0, 0);
         glTranslatef(x, y, 0);
-        
-
         DesenhaRectVertical(height, width, R, G, B);
     glPopMatrix();
 

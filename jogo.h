@@ -7,8 +7,7 @@
 
 class Jogo {
 
-    Arena* arena;
-    
+    Arena* arena;   
 
     private:
         void DesenhaJogo(Arena* arena);
@@ -23,6 +22,10 @@ class Jogo {
             return this->arena->getHeight();
         }   
 
+        Arena* getArena() {
+            return this->arena;
+        }
+       
 };
 
 #endif

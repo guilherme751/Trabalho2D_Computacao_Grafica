@@ -50,6 +50,9 @@ class Arena {
         void setJogador(Jogador* jogador) {
             this->jogador = jogador;
         }
+        Jogador* getJogador() {
+            return this->jogador;
+        }
 
 
 };

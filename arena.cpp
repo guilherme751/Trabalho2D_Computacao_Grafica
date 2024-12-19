@@ -10,14 +10,9 @@ void Arena::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLf
         glVertex2f(width, 0);
         glVertex2f(width, height);
     glEnd();  
-
-
 }
 
-
-
 void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B) {
-    printf("%f, %f\n", x, y);
     glPushMatrix();
         glTranslatef(-x, y, 0);
         glPushMatrix();

@@ -36,3 +36,8 @@ void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size) {
         DesenhaCirc(size, 255, 0, 0);
     glPopMatrix();
 }
+
+
+void Jogador::MoveEmX(GLfloat dx) {
+    Jogador::x += dx;
+}
