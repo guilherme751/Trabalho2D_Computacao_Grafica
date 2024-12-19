@@ -28,7 +28,6 @@ void keyPress(unsigned char key, int x, int y) {
         case 'D':
             keyStatus[(int)('d')] = 1; 
             break;
-
     }
     glutPostRedisplay();
 }
@@ -64,13 +63,22 @@ void init(void)
 
     glMatrixMode(GL_PROJECTION);  // Select the projection matrix
     glOrtho(jogadorX-visDim/2,  // X coordinate of left edge
-            jogadorX + visDim/2,   // X coordinate of right edge
+            jogadorX+visDim/2,   // X coordinate of right edge
             -visDim, // Y coordinate of bottom edge
             0,  // Y coordinate of top edge
             -100,                 // Z coordinate of the “near” plane
             100);                 // Z coordinate of the “far” plane
     glMatrixMode(GL_MODELVIEW);   // Select the projection matrix
     glLoadIdentity();
+}
+
+void mouse(int button, int state, int x, int y) {
+   y = Height - y;
+   GLfloat gX = (float) x/Height;
+   GLfloat gY = (float) y/Height;
+   
+   glutPostRedisplay();
+
 }
 void idle(void)
 {
@@ -95,14 +103,15 @@ int main(int argc, char** argv) {
     // Inicializa o jogo
     jogo.CarregarArquivoSVG("arena_teste.svg");
     visDim = jogo.getArenaHeight();
-    jogadorX = jogo.getArena()->getJogador()->getX();
-    printf("%f", jogadorX);
+    jogadorX = jogo.getArena()->getJogador()->getX() - jogo.getArena()->getX();
+    printf("%f\n", jogadorX);
 
     // Registra funções do GLUT
     glutDisplayFunc(display); 
     glutKeyboardFunc(keyPress);
     glutIdleFunc(idle);
-    glutKeyboardUpFunc(keyup);    
+    glutKeyboardUpFunc(keyup); 
+    glutMouseFunc(mouse);   
     init();
     glutMainLoop();
     return 0;

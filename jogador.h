@@ -12,6 +12,7 @@ class Jogador {
     private:
         void DesenhaCirc(GLfloat size, 
                         GLfloat R, GLfloat G, GLfloat B);
+        void DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B);
         void DesenhaJogador(GLfloat x, GLfloat y, GLfloat size);
         void DesenhaOponente(GLfloat x, GLfloat y, GLfloat size);
 
@@ -32,6 +33,15 @@ class Jogador {
         GLfloat getX() {
             return this->x;
         }
+        void setY(GLfloat y) {
+            this->y = y;
+        }
+        void setX(GLfloat x) {
+            this->x = x;
+        }
+        
+
+
 
 };
 

@@ -13,23 +13,39 @@ void Arena::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLf
 }
 
 void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B) {
+    // printf("%f, %f\n", -x, y);
+    // glPushMatrix();
+        // glTranslatef(-x, y, 0);
+        // glPushMatrix();
+        //     glRotatef(180, 1, 0, 0);
+        //     glTranslatef(x, y, 0);
+        //     DesenhaRect(height, width, R, G, B);
+        // glPopMatrix();
+        // for (Obstaculo obstaculo : this->obstaculos) {
+        //     obstaculo.Desenha();
+        // }
+        // this->jogador->Desenha(JOGADOR);
+
+        // for (Jogador oponente : this->oponentes) {
+        //     oponente.Desenha(OPONENTE);
+        // }
+    // glPopMatrix();
     glPushMatrix();
         glTranslatef(-x, y, 0);
+        glRotatef(180, 1, 0, 0);
         glPushMatrix();
-            glRotatef(180, 1, 0, 0);
             glTranslatef(x, y, 0);
             DesenhaRect(height, width, R, G, B);
         glPopMatrix();
         for (Obstaculo obstaculo : this->obstaculos) {
-            obstaculo.Desenha();
-        }
+                obstaculo.Desenha();
+            }
         this->jogador->Desenha(JOGADOR);
 
         for (Jogador oponente : this->oponentes) {
             oponente.Desenha(OPONENTE);
         }
     glPopMatrix();
-
 }
 
 void Arena::printArena() {

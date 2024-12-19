@@ -21,8 +21,8 @@ void Obstaculo::DesenhaObstaculo(GLfloat x, GLfloat y, GLfloat height, GLfloat w
 
     
     glPushMatrix();
-        glRotatef(180, 1, 0, 0);
         glTranslatef(x, y, 0);
+        // glRotatef(180, 1, 0, 0);
         DesenhaRectVertical(height, width, R, G, B);
     glPopMatrix();
 

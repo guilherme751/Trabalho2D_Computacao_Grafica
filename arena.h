@@ -54,6 +54,10 @@ class Arena {
             return this->jogador;
         }
 
+        GLfloat getX() {
+            return this->x;
+        }
+
 
 };
 
