@@ -8,6 +8,7 @@ class Jogador {
     GLfloat x;
     GLfloat y;
     GLfloat size; //diametro do circulo
+    GLfloat total_size;
 
     private:
         void DesenhaCirc(GLfloat size, 
@@ -43,6 +44,16 @@ class Jogador {
         }
         void setX(GLfloat x) {
             this->x = x;
+        }
+        GLfloat getSize() {
+            return this->total_size;
+        }
+
+        void updateX(GLfloat x_arena) {
+            this->x = this->x - x_arena;
+        }
+        void updateY(GLfloat y_arena) {
+            this->y = this->y - y_arena;
         }
         
 

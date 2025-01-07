@@ -11,7 +11,6 @@ class Jogo {
 
     private:
         void DesenhaJogo(Arena* arena);
-    
     public:
         void CarregarArquivoSVG(const char* caminho);
         void Desenha() {

@@ -7,8 +7,6 @@
 class Obstaculo {
     GLfloat height;
     GLfloat width;
-    GLfloat x;  
-    GLfloat y; 
 
     private:
         void DesenhaRectHorizontal(GLfloat height, GLfloat width,
@@ -19,6 +17,8 @@ class Obstaculo {
                         GLfloat R, GLfloat G, GLfloat B);
 
     public:
+        GLfloat x;  
+        GLfloat y; 
         Obstaculo(GLfloat height, GLfixed width, GLfloat x, GLfloat y) {
             this->height = height;
             this->width = width;
@@ -27,7 +27,14 @@ class Obstaculo {
         }
 
         void Desenha() {
-            DesenhaObstaculo(this->x, this->y, this->height, this->width, 0, 0, 0);
+            DesenhaObstaculo(this->x, this->y, this->height, this->width, 255, 255, 255);
+        }
+
+        void updateX(GLfloat x_arena) {
+            this->x = this->x - x_arena;
+        }
+        void updateY(GLfloat y_arena) {
+            this->y = this->y - y_arena;
         }
 };
 

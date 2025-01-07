@@ -32,6 +32,7 @@ class Arena {
             DesenhaArena(this->x, this->y, this->height, this->width, 0, 0, 255);
         }; 
 
+        void AtualizaCoordenadas();
         void printArena();
         GLfloat getHeight() {
             return this->height;

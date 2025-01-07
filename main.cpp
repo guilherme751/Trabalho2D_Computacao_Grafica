@@ -17,6 +17,7 @@ GLfloat visDim;
 GLfloat jogadorX;
 Jogo jogo;
 bool isJumping;
+GLfloat positionBeforeJump;
 
 int keyStatus[256];
 
@@ -49,6 +50,7 @@ void ResetKeyStatus() {
 void mouseCallback(int button, int state, int x, int y) {
     if (button == GLUT_RIGHT_BUTTON) {
         if (state == GLUT_DOWN) {
+            positionBeforeJump = jogo.getArena()->getJogador()->getY();
             isJumping = true;  
               
         } else if (state == GLUT_UP) {
@@ -59,16 +61,18 @@ void mouseCallback(int button, int state, int x, int y) {
 
 void updatePlayer() {
     if (isJumping) {
-        jogo.getArena()->getJogador()->MoveEmY(-INC_KEYIDLE);
+        if (positionBeforeJump - jogo.getArena()->getJogador()->getY() < 3*jogo.getArena()->getJogador()->getSize()) {
+            jogo.getArena()->getJogador()->MoveEmY(-INC_KEYIDLE);
+        }        
     }
 }
 
 
 
 void timer(int value) {
-    updatePlayer();      // Atualiza a física do jogador
-    glutPostRedisplay(); // Redesenha a tela
-    glutTimerFunc(16, timer, 0); // Rechama o timer (aproximadamente 60 FPS)
+    updatePlayer();     
+    glutPostRedisplay(); 
+    glutTimerFunc(16, timer, 0); 
 }
 
 void updateCameraView()
@@ -98,12 +102,14 @@ void init(void)
     glClearColor(0.f, 0.f, 0.f, 0.f); // Black, no opacity(alpha).
 
     glMatrixMode(GL_PROJECTION);  // Select the projection matrix
-    glOrtho(jogadorX-visDim/2,  // X coordinate of left edge
-            jogadorX+visDim/2,   // X coordinate of right edge
-            -visDim, // Y coordinate of bottom edge
-            0,  // Y coordinate of top edge
-            -100,                 // Z coordinate of the “near” plane
-            100);                 // Z coordinate of the “far” plane
+    // glOrtho(jogadorX-visDim/2,  // X coordinate of left edge
+    //         jogadorX+visDim/2,   // X coordinate of right edge
+    //         -visDim, // Y coordinate of bottom edge
+    //         0,  // Y coordinate of top edge
+    //         -100,                 // Z coordinate of the “near” plane
+    //         100);                 // Z coordinate of the “far” plane
+            
+    glOrtho(-500, 500, -500, 500, -100, 100);
     glMatrixMode(GL_MODELVIEW);   // Select the projection matrix
     glLoadIdentity();
 }
@@ -133,6 +139,7 @@ int main(int argc, char** argv) {
     glutCreateWindow("Trabalho 2D");
     // Inicializa o jogo
     jogo.CarregarArquivoSVG("arena_teste.svg");
+    jogo.getArena()->AtualizaCoordenadas();
     visDim = jogo.getArenaHeight();
     jogadorX = jogo.getArena()->getJogador()->getX() - jogo.getArena()->getX();
     

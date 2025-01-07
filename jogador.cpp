@@ -34,17 +34,19 @@ void Jogador::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, G
 
 
 void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size) {
-    size = size*0.6;
+    size = size*0.3;
     GLfloat bodyHeight = size * 1.3; 
     GLfloat bodyWidth = size * 0.8; 
     GLfloat armHeight = bodyHeight*0.8;
     GLfloat armWidth = size*0.2;
 
+    this->total_size = size + bodyHeight + 2*armHeight;
+
     glPushMatrix();
         glTranslatef(x, y, 0); 
 
         glPushMatrix();
-            glTranslatef(0, -size*3, 0); 
+            glTranslatef(0, -size*2, 0); 
             DesenhaCirc(size, 0, 255, 0);  // desenha a cabeça
 
             glTranslatef(0,  size/2, 0);
@@ -58,11 +60,11 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size) {
             glPopMatrix();
             glPushMatrix();
                 glTranslatef(0, bodyHeight, 0);
-                glRotatef(30, 0, 0, 1);
+                glRotatef(0, 0, 0, 1);
                 DesenhaRect(armHeight, armWidth, 255, 0, 0);
 
                 glTranslatef(0, armHeight, 0);
-                glRotatef(30, 0, 0, 1);
+                glRotatef(0, 0, 0, 1);
                 DesenhaRect(armHeight, armWidth, 255, 0, 0);
             glPopMatrix();
 
@@ -87,19 +89,66 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size) {
 
 
 void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size) {
+    size = size*0.3;
+    GLfloat bodyHeight = size * 1.3; 
+    GLfloat bodyWidth = size * 0.8; 
+    GLfloat armHeight = bodyHeight*0.8;
+    GLfloat armWidth = size*0.2;
+
+    this->total_size = size + bodyHeight + 2*armHeight;
+
     glPushMatrix();
-        // glRotatef(180, 1, 0, 0);
-        glTranslatef(x, y, 0);
-        DesenhaCirc(size, 255, 0, 0);
+        glTranslatef(x, y, 0); 
+
+        glPushMatrix();
+            glTranslatef(0, -size*2, 0); 
+            DesenhaCirc(size, 255, 0, 0);  // desenha a cabeça
+
+            glTranslatef(0,  size/2, 0);
+            DesenhaRect(bodyHeight, bodyWidth, 255, 0, 0); // desenha o tronco
+
+
+            glPushMatrix();
+                glTranslatef(0, bodyHeight/2, 0);
+                glRotatef(-100, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 255, 255, 0); // desenha o braço
+            glPopMatrix();
+            glPushMatrix();
+                glTranslatef(0, bodyHeight, 0);
+                glRotatef(30, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 0, 255, 0);
+
+                glTranslatef(0, armHeight, 0);
+                glRotatef(30, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 0, 255, 0);
+            glPopMatrix();
+
+            glPushMatrix();
+                glTranslatef(0, bodyHeight, 0);
+                glRotatef(-30, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 0, 255, 0);
+
+                glTranslatef(0, armHeight, 0);
+                glRotatef(60, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 0, 255, 0);
+            glPopMatrix();
+
+
+
+        glPopMatrix();  
+
+
     glPopMatrix();
 }
 
 
 void Jogador::MoveEmX(GLfloat dx) {
     Jogador::x += dx;    
+    
 }
 
 void Jogador::MoveEmY(GLfloat dy) {
     Jogador::y += dy;    
+    printf("%f\n", y);
 }
 
