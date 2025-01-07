@@ -9,13 +9,15 @@
 #include "jogo.h"
 #include "arena.h"
 
-#define INC_KEYIDLE 1
+#define INC_KEYIDLE 0.5
 // Window dimensions
 const GLint Width = 800;
 const GLint Height = 800;
 GLfloat visDim;
 GLfloat jogadorX;
 Jogo jogo;
+bool isJumping;
+
 int keyStatus[256];
 
 void keyPress(unsigned char key, int x, int y) {
@@ -44,14 +46,48 @@ void ResetKeyStatus() {
         keyStatus[i] = 0;
 }
 
-void display() {
-    glClear(GL_COLOR_BUFFER_BIT); // Limpa a tela
+void mouseCallback(int button, int state, int x, int y) {
+    if (button == GLUT_RIGHT_BUTTON) {
+        if (state == GLUT_DOWN) {
+            isJumping = true;  
+              
+        } else if (state == GLUT_UP) {
+            isJumping = false; // Right button released
+        }
+    }
+}
 
+void updatePlayer() {
+    if (isJumping) {
+        jogo.getArena()->getJogador()->MoveEmY(-INC_KEYIDLE);
+    }
+}
+
+
+
+void timer(int value) {
+    updatePlayer();      // Atualiza a física do jogador
+    glutPostRedisplay(); // Redesenha a tela
+    glutTimerFunc(16, timer, 0); // Rechama o timer (aproximadamente 60 FPS)
+}
+
+void updateCameraView()
+{
+    glMatrixMode(GL_MODELVIEW); // Switch to the model-view matrix
+    glLoadIdentity();          // Reset the matrix
+
+    // Translate the world so the player is always centered
+    glTranslatef(-jogadorX, 0, 0);
+}
+void display() {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Limpa a tela
+    updateCameraView();
     // Chama o método para desenhar todos os elementos
     jogo.Desenha();
 
     glutSwapBuffers(); // Troca os buffers (Double buffering)
 }
+
 
 
 void init(void)
@@ -72,14 +108,7 @@ void init(void)
     glLoadIdentity();
 }
 
-void mouse(int button, int state, int x, int y) {
-   y = Height - y;
-   GLfloat gX = (float) x/Height;
-   GLfloat gY = (float) y/Height;
-   
-   glutPostRedisplay();
 
-}
 void idle(void)
 {
     double inc = INC_KEYIDLE; 
@@ -87,10 +116,12 @@ void idle(void)
     if (keyStatus[(int)('a')])
     {
         jogo.getArena()->getJogador()->MoveEmX(-inc);
+        jogadorX = jogo.getArena()->getJogador()->getX() - jogo.getArena()->getX();
     }
     if (keyStatus[(int)('d')])
     {
         jogo.getArena()->getJogador()->MoveEmX(inc);
+        jogadorX = jogo.getArena()->getJogador()->getX() - jogo.getArena()->getX();
     }
     glutPostRedisplay();
 }
@@ -104,14 +135,15 @@ int main(int argc, char** argv) {
     jogo.CarregarArquivoSVG("arena_teste.svg");
     visDim = jogo.getArenaHeight();
     jogadorX = jogo.getArena()->getJogador()->getX() - jogo.getArena()->getX();
-    printf("%f\n", jogadorX);
-
+    
     // Registra funções do GLUT
     glutDisplayFunc(display); 
     glutKeyboardFunc(keyPress);
     glutIdleFunc(idle);
     glutKeyboardUpFunc(keyup); 
-    glutMouseFunc(mouse);   
+    glutMouseFunc(mouseCallback);  
+    // glutMotionFunc(motionCallback); 
+    glutTimerFunc(0, timer, 0);
     init();
     glutMainLoop();
     return 0;

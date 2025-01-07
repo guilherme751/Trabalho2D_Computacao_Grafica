@@ -58,6 +58,11 @@ class Arena {
             return this->x;
         }
 
+        GLfloat getY() {
+            return this->y;
+        }
+
+
 
 };
 

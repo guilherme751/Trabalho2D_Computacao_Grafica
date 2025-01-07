@@ -30,8 +30,13 @@ class Jogador {
             }
         }
         void MoveEmX(GLfloat dx);
+        void MoveEmY(GLfloat dy);
+
         GLfloat getX() {
             return this->x;
+        }
+        GLfloat getY() {
+            return this->y;
         }
         void setY(GLfloat y) {
             this->y = y;

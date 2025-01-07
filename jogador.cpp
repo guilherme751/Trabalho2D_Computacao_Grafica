@@ -34,52 +34,52 @@ void Jogador::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, G
 
 
 void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size) {
-    GLfloat bodyHeight = size; // Height of the torso (relative to the head size)
-    GLfloat bodyWidth = size * 0.5; // Width of the torso
-    GLfloat limbLength = size;      // Length of arms and legs
-    GLfloat limbWidth = size * 0.2; // Width of arms and legs
+    size = size*0.6;
+    GLfloat bodyHeight = size * 1.3; 
+    GLfloat bodyWidth = size * 0.8; 
+    GLfloat armHeight = bodyHeight*0.8;
+    GLfloat armWidth = size*0.2;
 
     glPushMatrix();
-        // Translate the entire player to the specified position
-        glTranslatef(x, y, 0); // Negate Y because the arena is rotated on the X-axis
+        glTranslatef(x, y, 0); 
 
-        // Draw the head (circle)
         glPushMatrix();
-            glTranslatef(0, -size*4, 0); // Adjust position above the torso
-            DesenhaCirc(size / 2, 0, 255, 0); // Head in green
+            glTranslatef(0, -size*3, 0); 
+            DesenhaCirc(size, 0, 255, 0);  // desenha a cabeça
 
-        // Draw the torso (rectangle)
-            glTranslatef(0, size/2, 0);
-            DesenhaRect(bodyHeight, bodyWidth, 0, 255, 0); // Torso in green
+            glTranslatef(0,  size/2, 0);
+            DesenhaRect(bodyHeight, bodyWidth, 0, 255, 0); // desenha o tronco
+
+
+            glPushMatrix();
+                glTranslatef(0, bodyHeight/2, 0);
+                glRotatef(-100, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 255, 255, 0); // desenha o braço
+            glPopMatrix();
+            glPushMatrix();
+                glTranslatef(0, bodyHeight, 0);
+                glRotatef(30, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 255, 0, 0);
+
+                glTranslatef(0, armHeight, 0);
+                glRotatef(30, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 255, 0, 0);
+            glPopMatrix();
+
+            glPushMatrix();
+                glTranslatef(0, bodyHeight, 0);
+                glRotatef(-30, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 255, 0, 0);
+
+                glTranslatef(0, armHeight, 0);
+                glRotatef(60, 0, 0, 1);
+                DesenhaRect(armHeight, armWidth, 255, 0, 0);
+            glPopMatrix();
+
+
+
         glPopMatrix();  
 
-        // // Draw the right arm
-        // glPushMatrix();
-        //     glTranslatef(bodyWidth / 2, -(bodyHeight / 2), 0); // Attach to the right shoulder
-        //     glRotatef(45, 0, 0, 1);                          // Rotate downward at an angle
-        //     DesenhaRect(limbLength, limbWidth, 255, 255, 0); // Arm in yellow
-        // glPopMatrix();
-
-        // // Draw the left arm
-        // glPushMatrix();
-        //     glTranslatef(-bodyWidth / 2, -(bodyHeight / 2), 0); // Attach to the left shoulder
-        //     glRotatef(-45, 0, 0, 1);                           // Rotate downward at an angle
-        //     DesenhaRect(limbLength, limbWidth, 255, 255, 0);   // Arm in yellow
-        // glPopMatrix();
-
-        // // Draw the right leg
-        // glPushMatrix();
-        //     glTranslatef(bodyWidth / 4, bodyHeight / 2, 0); // Attach to the right hip
-        //     glRotatef(-45, 0, 0, 1);                       // Rotate outward at an angle
-        //     DesenhaRect(limbLength, limbWidth, 255, 0, 0); // Leg in red
-        // glPopMatrix();
-
-        // // Draw the left leg
-        // glPushMatrix();
-        //     glTranslatef(-bodyWidth / 4, bodyHeight / 2, 0); // Attach to the left hip
-        //     glRotatef(45, 0, 0, 1);                         // Rotate outward at an angle
-        //     DesenhaRect(limbLength, limbWidth, 255, 0, 0);  // Leg in red
-        // glPopMatrix();
 
     glPopMatrix();
 }
@@ -96,5 +96,10 @@ void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size) {
 
 
 void Jogador::MoveEmX(GLfloat dx) {
-    Jogador::x += dx;
+    Jogador::x += dx;    
 }
+
+void Jogador::MoveEmY(GLfloat dy) {
+    Jogador::y += dy;    
+}
+
