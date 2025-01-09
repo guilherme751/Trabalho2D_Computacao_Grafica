@@ -10,9 +10,9 @@ class Arena {
     GLfloat width;
     GLfloat x;  
     GLfloat y;  
-    std::vector<Obstaculo> obstaculos;
+    std::vector<Obstaculo*> obstaculos;
     Jogador* jogador;
-    std::vector<Jogador> oponentes;
+    std::vector<Jogador*> oponentes;
 
 
     private:
@@ -37,14 +37,21 @@ class Arena {
         GLfloat getHeight() {
             return this->height;
         }
+        GLfloat getWidth() {
+            return this->width;
+        }
+
+        std::vector<Obstaculo*> getObstaculos() {
+            return this->obstaculos;
+        }
 
         void addObstaculo(GLfloat height, GLfloat width, GLfloat x, GLfloat y) {
-            Obstaculo obstaculo = Obstaculo(height, width, x, y);
+            Obstaculo* obstaculo = new Obstaculo(height, width, x, y);
             this->obstaculos.push_back(obstaculo);
         }
 
         void addOponente(GLfloat x, GLfloat y, GLfloat size) {
-            Jogador oponente = Jogador(x, y, size);
+            Jogador* oponente = new Jogador(x, y, size);
             this->oponentes.push_back(oponente);
         }
 

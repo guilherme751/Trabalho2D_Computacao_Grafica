@@ -27,7 +27,7 @@ class Obstaculo {
         }
 
         void Desenha() {
-            DesenhaObstaculo(this->x, this->y, this->height, this->width, 255, 255, 255);
+            DesenhaObstaculo(this->x, this->y, this->height, this->width, 0, 0, 0);
         }
 
         void updateX(GLfloat x_arena) {
@@ -36,6 +36,14 @@ class Obstaculo {
         void updateY(GLfloat y_arena) {
             this->y = this->y - y_arena;
         }
+
+        GLfloat getHeight() {
+            return this->height;
+        }
+        GLfloat getWidth() {
+            return this->width;
+        }
+        
 };
 
 

@@ -15,20 +15,20 @@ void Arena::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLf
 void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B) {
     
     glPushMatrix();
-        // glTranslatef(-x, y, 0);
+        
         glRotatef(180, 1, 0, 0);
         glPushMatrix();
             glTranslatef(x, y, 0);
             DesenhaRect(height, width, R, G, B);
         glPopMatrix();
-        for (Obstaculo obstaculo : this->obstaculos) {
-                obstaculo.Desenha();
+        for (Obstaculo* obstaculo : this->obstaculos) {
+                obstaculo->Desenha();
             }
+        for (Jogador* oponente : this->oponentes) {
+            oponente->Desenha(OPONENTE);
+        }
         this->jogador->Desenha(JOGADOR);
 
-        for (Jogador oponente : this->oponentes) {
-            oponente.Desenha(OPONENTE);
-        }
     glPopMatrix();
 }
 
@@ -37,20 +37,18 @@ void Arena::printArena() {
 }
 
 void Arena::AtualizaCoordenadas() {
-    for (Obstaculo obstaculo : obstaculos) {
-        obstaculo.updateX(this->x);
-        obstaculo.updateY(this->y);
-        printf("(%f, %f)\n", obstaculo.x, obstaculo.y);
+    for (Obstaculo* obstaculo : obstaculos) {
+        obstaculo->updateX(this->x);
+        obstaculo->updateY(this->y);
     }
 
-    for (Jogador oponente : oponentes) {
-        oponente.updateX(this->x);
-        oponente.updateY(this->y);
+    for (Jogador* oponente : oponentes) {
+        oponente->updateX(this->x);
+        oponente->updateY(this->y);
     }
 
     this->jogador->updateX(this->x);
     this->jogador->updateY(this->y);
-    printf("JOGADOR: (%f, %f)\n", this->jogador->getX(), this->jogador->getY());
 
     this->x = 0;
     this->y = 0;

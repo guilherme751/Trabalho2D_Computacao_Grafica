@@ -47,26 +47,86 @@ void ResetKeyStatus() {
         keyStatus[i] = 0;
 }
 
-void mouseCallback(int button, int state, int x, int y) {
-    if (button == GLUT_RIGHT_BUTTON) {
-        if (state == GLUT_DOWN) {
-            positionBeforeJump = jogo.getArena()->getJogador()->getY();
-            isJumping = true;  
-              
-        } else if (state == GLUT_UP) {
-            isJumping = false; // Right button released
+bool checkCollision(float incX, float incY) {
+    std::vector<Obstaculo*> obstaculos = jogo.getArena()->getObstaculos();
+    GLfloat dimCirculo = jogo.getArena()->getJogador()->getWidth()/0.3;
+
+    Jogador* jogador = jogo.getArena()->getJogador();
+    GLfloat jogadorAltura = jogador->getSize();
+    GLfloat jogadorLargura = jogador->getWidth();
+    GLfloat jogadorX = jogador->getX() - dimCirculo*0.15 + incX;
+    GLfloat jogadorY = jogador->getY() + dimCirculo/2 - jogadorAltura + incY;
+
+    for (Obstaculo* obstaculo : obstaculos) {
+        GLfloat obstaculoX = obstaculo->x;
+        GLfloat obstaculoY = obstaculo->y;
+        GLfloat obstaculoLargura = obstaculo->getWidth();
+        GLfloat obstaculoAltura = obstaculo->getHeight();
+
+        if (jogadorX < obstaculoX + obstaculoLargura && // lado direito do jogador não ultrapassa o lado esquerdo do obstáculo
+            jogadorX + jogadorLargura > obstaculoX &&  // lado esquerdo do jogador não ultrapassa o lado direito do obstáculo
+            jogadorY < obstaculoY + obstaculoAltura && // lado superior do jogador não ultrapassa o lado inferior do obstáculo
+            jogadorY + jogadorAltura > obstaculoY) {  // lado inferior do jogador não ultrapassa o lado superior do obstáculo
+            return false; // Colisão detectada
         }
     }
+    if (jogadorY + jogadorAltura > jogo.getArena()->getHeight() || jogadorY < 0) {
+        return false;
+    }
+
+    return true; 
+}
+bool wayup, falling = false;
+
+void mouseCallback(int button, int state, int x, int y) {
+    
+        if (button == GLUT_RIGHT_BUTTON) {
+            if (!isJumping && !falling) {
+                if (state == GLUT_DOWN) {
+                    positionBeforeJump = jogo.getArena()->getJogador()->getY();
+                    
+                    wayup = true;
+                    isJumping = true;
+                    
+                    
+                } 
+            } else if (state == GLUT_UP) {
+                wayup = false;
+            }
+        }
+    
 }
 
 void updatePlayer() {
     if (isJumping) {
-        if (positionBeforeJump - jogo.getArena()->getJogador()->getY() < 3*jogo.getArena()->getJogador()->getSize()) {
-            jogo.getArena()->getJogador()->MoveEmY(-INC_KEYIDLE);
-        }        
+        if (wayup) {
+            if (positionBeforeJump - jogo.getArena()->getJogador()->getY() < 3*jogo.getArena()->getJogador()->getSize()) {
+                if (checkCollision(0, -INC_KEYIDLE)) {
+                    jogo.getArena()->getJogador()->MoveEmY(-INC_KEYIDLE);
+                }
+            } 
+            else {
+                wayup = false;
+            }
+        } 
+        else {
+            if (checkCollision(0, INC_KEYIDLE)) {
+                jogo.getArena()->getJogador()->MoveEmY(INC_KEYIDLE);
+            }
+            else {
+                isJumping = false;
+            }
+        }      
+    } else {
+        if (checkCollision(0, INC_KEYIDLE)) {
+                falling = true;
+                jogo.getArena()->getJogador()->MoveEmY(INC_KEYIDLE);
+        } else {
+            falling = false;
+        }
     }
+    
 }
-
 
 
 void timer(int value) {
@@ -102,14 +162,14 @@ void init(void)
     glClearColor(0.f, 0.f, 0.f, 0.f); // Black, no opacity(alpha).
 
     glMatrixMode(GL_PROJECTION);  // Select the projection matrix
-    // glOrtho(jogadorX-visDim/2,  // X coordinate of left edge
-    //         jogadorX+visDim/2,   // X coordinate of right edge
-    //         -visDim, // Y coordinate of bottom edge
-    //         0,  // Y coordinate of top edge
-    //         -100,                 // Z coordinate of the “near” plane
-    //         100);                 // Z coordinate of the “far” plane
+    glOrtho(jogadorX-visDim/2,  // X coordinate of left edge
+            jogadorX+visDim/2,   // X coordinate of right edge
+            -visDim, // Y coordinate of bottom edge
+            0,  // Y coordinate of top edge
+            -100,                 // Z coordinate of the “near” plane
+            100);                 // Z coordinate of the “far” plane
             
-    glOrtho(-500, 500, -500, 500, -100, 100);
+    // glOrtho(-500, 500, -500, 500, -100, 100);
     glMatrixMode(GL_MODELVIEW);   // Select the projection matrix
     glLoadIdentity();
 }
@@ -118,16 +178,23 @@ void init(void)
 void idle(void)
 {
     double inc = INC_KEYIDLE; 
-    
+    GLfloat size = jogo.getArena()->getJogador()->getWidth();
     if (keyStatus[(int)('a')])
     {
-        jogo.getArena()->getJogador()->MoveEmX(-inc);
-        jogadorX = jogo.getArena()->getJogador()->getX() - jogo.getArena()->getX();
+        if (jogadorX -size*0.15 > inc && checkCollision(-inc, 0)) {
+            
+            jogadorX = jogo.getArena()->getJogador()->MoveEmX(-inc);
+        }
     }
     if (keyStatus[(int)('d')])
     {
-        jogo.getArena()->getJogador()->MoveEmX(inc);
-        jogadorX = jogo.getArena()->getJogador()->getX() - jogo.getArena()->getX();
+        if (jogadorX - size*0.15 > jogo.getArena()->getWidth()) {
+            
+            printf("GANHOU!!\n");
+        }
+        if (checkCollision(inc, 0)) {
+            jogadorX = jogo.getArena()->getJogador()->MoveEmX(inc);
+        }
     }
     glutPostRedisplay();
 }
@@ -141,7 +208,7 @@ int main(int argc, char** argv) {
     jogo.CarregarArquivoSVG("arena_teste.svg");
     jogo.getArena()->AtualizaCoordenadas();
     visDim = jogo.getArenaHeight();
-    jogadorX = jogo.getArena()->getJogador()->getX() - jogo.getArena()->getX();
+    jogadorX = jogo.getArena()->getJogador()->getX();
     
     // Registra funções do GLUT
     glutDisplayFunc(display); 

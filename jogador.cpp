@@ -36,17 +36,18 @@ void Jogador::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, G
 void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size) {
     size = size*0.3;
     GLfloat bodyHeight = size * 1.3; 
-    GLfloat bodyWidth = size * 0.8; 
+    GLfloat bodyWidth = size; 
     GLfloat armHeight = bodyHeight*0.8;
     GLfloat armWidth = size*0.2;
 
     this->total_size = size + bodyHeight + 2*armHeight;
+    
 
     glPushMatrix();
-        glTranslatef(x, y, 0); 
+        glTranslatef(x, y+size, 0); 
 
         glPushMatrix();
-            glTranslatef(0, -size*2, 0); 
+            glTranslatef(0, -size*3, 0); 
             DesenhaCirc(size, 0, 255, 0);  // desenha a cabeça
 
             glTranslatef(0,  size/2, 0);
@@ -91,17 +92,17 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size) {
 void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size) {
     size = size*0.3;
     GLfloat bodyHeight = size * 1.3; 
-    GLfloat bodyWidth = size * 0.8; 
+    GLfloat bodyWidth = size; 
     GLfloat armHeight = bodyHeight*0.8;
     GLfloat armWidth = size*0.2;
 
     this->total_size = size + bodyHeight + 2*armHeight;
 
     glPushMatrix();
-        glTranslatef(x, y, 0); 
+        glTranslatef(x, y+size, 0); 
 
         glPushMatrix();
-            glTranslatef(0, -size*2, 0); 
+            glTranslatef(0, -size*3, 0); 
             DesenhaCirc(size, 255, 0, 0);  // desenha a cabeça
 
             glTranslatef(0,  size/2, 0);
@@ -142,13 +143,13 @@ void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size) {
 }
 
 
-void Jogador::MoveEmX(GLfloat dx) {
-    Jogador::x += dx;    
-    
+GLfloat Jogador::MoveEmX(GLfloat dx) {
+    Jogador::x += dx; 
+    return Jogador::x;  
 }
 
-void Jogador::MoveEmY(GLfloat dy) {
+GLfloat Jogador::MoveEmY(GLfloat dy) {
     Jogador::y += dy;    
-    printf("%f\n", y);
+    return Jogador::y;  
 }
 
