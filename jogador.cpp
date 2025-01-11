@@ -111,7 +111,7 @@ void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size) {
 
             glPushMatrix();
                 glTranslatef(0, bodyHeight/2, 0);
-                glRotatef(-100, 0, 0, 1);
+                glRotatef(100, 0, 0, 1);
                 DesenhaRect(armHeight, armWidth, 255, 255, 0); // desenha o braço
             glPopMatrix();
             glPushMatrix();

@@ -9,6 +9,7 @@ class Jogador {
     GLfloat y;
     GLfloat size; 
     GLfloat total_size;
+    bool oponente;
     
 
     private:
@@ -19,10 +20,12 @@ class Jogador {
         void DesenhaOponente(GLfloat x, GLfloat y, GLfloat size);
 
     public:
+        int dir;
         Jogador(GLfloat x, GLfloat y, GLfloat size) {
             this->x = x;
             this->y = y;
             this->size = size;
+            this->dir = 1;
         }
         void Desenha(int tipo) {
             if (tipo == JOGADOR)
@@ -53,7 +56,6 @@ class Jogador {
         GLfloat getSize() {
             return this->total_size;
         }
-       
         
 
         void updateX(GLfloat x_arena) {

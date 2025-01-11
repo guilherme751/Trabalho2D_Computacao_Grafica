@@ -70,6 +70,10 @@ class Arena {
             return this->y;
         }
 
+        std::vector<Jogador*> getOpponents() {
+            return this->oponentes;
+        }
+
 
 
 };

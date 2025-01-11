@@ -47,16 +47,14 @@ void ResetKeyStatus() {
         keyStatus[i] = 0;
 }
 
-bool checkCollision(float incX, float incY) {
+bool checkCollision(Jogador* jogador, float incX, float incY) {
     std::vector<Obstaculo*> obstaculos = jogo.getArena()->getObstaculos();
     GLfloat dimCirculo = jogo.getArena()->getJogador()->getWidth()/0.3;
 
-    Jogador* jogador = jogo.getArena()->getJogador();
     GLfloat jogadorAltura = jogador->getSize();
     GLfloat jogadorLargura = jogador->getWidth();
     GLfloat jogadorX = jogador->getX() - dimCirculo*0.15 + incX;
     GLfloat jogadorY = jogador->getY() + dimCirculo/2 - jogadorAltura + incY;
-
     for (Obstaculo* obstaculo : obstaculos) {
         GLfloat obstaculoX = obstaculo->x;
         GLfloat obstaculoY = obstaculo->y;
@@ -70,13 +68,15 @@ bool checkCollision(float incX, float incY) {
             return false; // Colisão detectada
         }
     }
-    if (jogadorY + jogadorAltura > jogo.getArena()->getHeight() || jogadorY < 0) {
+    // printf("%f, %f, %f, %f\n", jogadorX ,jogadorY, jogadorAltura,jogo.getArena()->getHeight() );
+    if (jogadorY + jogadorAltura -INC_KEYIDLE> jogo.getArena()->getHeight() || jogadorY < 0) {
         return false;
     }
 
     return true; 
 }
 bool wayup, falling = false;
+float inc = INC_KEYIDLE;
 
 void mouseCallback(int button, int state, int x, int y) {
     
@@ -92,25 +92,31 @@ void mouseCallback(int button, int state, int x, int y) {
                 } 
             } else if (state == GLUT_UP) {
                 wayup = false;
+                inc = INC_KEYIDLE;
             }
         }
     
 }
-
 void updatePlayer() {
     if (isJumping) {
         if (wayup) {
             if (positionBeforeJump - jogo.getArena()->getJogador()->getY() < 3*jogo.getArena()->getJogador()->getSize()) {
-                if (checkCollision(0, -INC_KEYIDLE)) {
-                    jogo.getArena()->getJogador()->MoveEmY(-INC_KEYIDLE);
+                if (checkCollision(jogo.getArena()->getJogador(), 0, -inc)) {
+                    jogo.getArena()->getJogador()->MoveEmY(-inc);
+                    // inc = inc - 0.003;
+                } 
+                else {
+                    wayup = false;
+                    inc = INC_KEYIDLE;
                 }
             } 
             else {
                 wayup = false;
+                inc = INC_KEYIDLE;
             }
         } 
         else {
-            if (checkCollision(0, INC_KEYIDLE)) {
+            if (checkCollision(jogo.getArena()->getJogador(), 0, INC_KEYIDLE)) {
                 jogo.getArena()->getJogador()->MoveEmY(INC_KEYIDLE);
             }
             else {
@@ -118,9 +124,9 @@ void updatePlayer() {
             }
         }      
     } else {
-        if (checkCollision(0, INC_KEYIDLE)) {
-                falling = true;
-                jogo.getArena()->getJogador()->MoveEmY(INC_KEYIDLE);
+        if (checkCollision(jogo.getArena()->getJogador(), 0, INC_KEYIDLE)) {
+            falling = true;
+            jogo.getArena()->getJogador()->MoveEmY(INC_KEYIDLE);
         } else {
             falling = false;
         }
@@ -128,9 +134,33 @@ void updatePlayer() {
     
 }
 
+void updateOpponents() {
+    std::vector<Jogador*> oponentes = jogo.getArena()->getOpponents();
+    for (Jogador* opponent : oponentes) {        
+
+        if (!checkCollision(opponent, opponent->dir*INC_KEYIDLE, 0)){
+            opponent->dir *= -1;
+        }
+
+        if (checkCollision(opponent, 0, 2*INC_KEYIDLE)) {
+            opponent->dir *= -1;
+        }
+        opponent->MoveEmX(opponent->dir * INC_KEYIDLE);
+
+        
+    }
+    // static int dir = 1;
+    // Jogador* op1 = oponentes[1];
+    // if (!checkCollision(op1, dir*INC_KEYIDLE, 0)) {
+    //     dir *= -1;
+    // }
+    // op1->MoveEmX(dir * INC_KEYIDLE);
+}
+
 
 void timer(int value) {
     updatePlayer();     
+    // updateOpponents();
     glutPostRedisplay(); 
     glutTimerFunc(16, timer, 0); 
 }
@@ -181,7 +211,7 @@ void idle(void)
     GLfloat size = jogo.getArena()->getJogador()->getWidth();
     if (keyStatus[(int)('a')])
     {
-        if (jogadorX -size*0.15 > inc && checkCollision(-inc, 0)) {
+        if (jogadorX -size*0.15 > inc && checkCollision(jogo.getArena()->getJogador(), -inc, 0)) {
             
             jogadorX = jogo.getArena()->getJogador()->MoveEmX(-inc);
         }
@@ -192,10 +222,13 @@ void idle(void)
             
             printf("GANHOU!!\n");
         }
-        if (checkCollision(inc, 0)) {
+        if (checkCollision(jogo.getArena()->getJogador(), inc, 0)) {
             jogadorX = jogo.getArena()->getJogador()->MoveEmX(inc);
         }
     }
+    updatePlayer();
+    updateOpponents();     
+
     glutPostRedisplay();
 }
 
@@ -217,7 +250,7 @@ int main(int argc, char** argv) {
     glutKeyboardUpFunc(keyup); 
     glutMouseFunc(mouseCallback);  
     // glutMotionFunc(motionCallback); 
-    glutTimerFunc(0, timer, 0);
+    // glutTimerFunc(0, timer, 0);
     init();
     glutMainLoop();
     return 0;
