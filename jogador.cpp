@@ -171,6 +171,21 @@ Tiro* Jogador::Atira() {
     tiroY += this->y + dist2base;
 
 
-    return new Tiro(tiroX, tiroY, 20);
+    return new Tiro(tiroX, tiroY, atan2(tiroY-baseY, tiroX-baseX) * 180.0 / M_PI);
 }
+
+
+void Jogador::DesenhaTiros(){
+    for (Tiro* tiro : tiros) {       
+        tiro->Desenha();       
+    }
+}
+
+void Jogador::UpdateTiros() {
+
+    for (Tiro* tiro : tiros) {
+        tiro->Move(5.0);
+    }
+}
+
 

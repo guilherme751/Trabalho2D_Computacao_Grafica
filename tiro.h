@@ -12,27 +12,40 @@ class Tiro {
     GLfloat y; 
     GLfloat directionAng;
     GLfloat vel;
+
 private:
     void DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B);
-    void DesenhaTiro(GLfloat x, GLfloat y);
+    void DesenhaTiro(GLfloat x, GLfloat y, GLfloat radius);
 public:
+    GLfloat radius;
+    bool desenhado;
+    
     Tiro(GLfloat x, GLfloat y, GLfloat directionAng){
-        this->x = x; 
-        this->y = y; 
+        this->XInit = x; 
+        this->YInit = y; 
         this->x = x; 
         this->y = y; 
         this->directionAng = directionAng; 
-        this->vel = 5;
+        this->vel = 1.5;
+        this->desenhado = false;
+        this->radius = radiusTiro;
     };
     void Desenha(){ 
-        DesenhaTiro(this->x, this->y);
+        DesenhaTiro(this->x, this->y, this->radius);
     };
     void Move(GLdouble timeDifference);
-    bool Valido();
     void GetPos(GLfloat &xOut, GLfloat &yOut){
         xOut = this->x;
         yOut = this->y;
     };
+
+    GLfloat getX() {
+        return this->x;
+    }
+
+    GLfloat getY() {
+        return this->y;
+    }
 
     
 };

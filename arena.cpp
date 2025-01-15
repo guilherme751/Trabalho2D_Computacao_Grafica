@@ -25,7 +25,8 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat height, GLfloat width, GL
                 obstaculo->Desenha();
             }
         for (Jogador* oponente : this->oponentes) {
-            oponente->Desenha(OPONENTE);
+            if (!oponente->morreu)
+                oponente->Desenha(OPONENTE);
         }
         this->jogador->Desenha(JOGADOR);
 

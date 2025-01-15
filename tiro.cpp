@@ -24,12 +24,12 @@ void Tiro::DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B)
 
 }
 
-void Tiro::DesenhaTiro(GLfloat x, GLfloat y)
+void Tiro::DesenhaTiro(GLfloat x, GLfloat y, GLfloat radius)
 {
     glPushMatrix();
     glRotatef(180, 1, 0, 0);
     glTranslatef(x, y, 0);
-    DesenhaCirc(radiusTiro, 255, 255, 255);
+    DesenhaCirc(radius, 255, 255, 255);
     glPopMatrix();
 
 }
@@ -40,15 +40,8 @@ void Tiro::Move(GLdouble timeDifference)
     GLfloat dX = cos(directionAng * M_PI / 180.0);
     GLfloat dY = sin(directionAng * M_PI / 180.0);
    
-    x = x + dX;
-    y = y + dY;
+    x = x + dX*vel;
+    y = y + dY*vel;
    
 }
 
-// bool Tiro::Valido()
-// {
-//     if (gY > DISTANCIA_MAX/2 || gX < -DISTANCIA_MAX/2 || gX > DISTANCIA_MAX/2 || gY < -DISTANCIA_MAX/2) {
-//         return false;
-//     }
-//     return true;
-// }

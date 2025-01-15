@@ -31,6 +31,7 @@ class Jogador {
 
     public:
         int dir;
+        bool morreu;
         Jogador(GLfloat x, GLfloat y, GLfloat size) {
             this->x = x;
             this->y = y;
@@ -44,7 +45,7 @@ class Jogador {
             this->arm_leg_Width = this->dim_proporcional*0.2;
             this->dist2base = size/2;
             this->total_size = this->dim_proporcional + this->bodyHeight + 2*this->arm_leg_Height;
-
+            this->morreu = false;
         }
         void Desenha(int tipo) {
             if (tipo == JOGADOR)
@@ -96,6 +97,10 @@ class Jogador {
             this->tiros.push_front(tiro);
         }
 
+        std::list<Tiro*>& getTiros() {
+            return this->tiros;
+        }
+
         
         Tiro* Atira();
 
@@ -107,6 +112,10 @@ class Jogador {
                 return false;
             }
         }
+
+        void DesenhaTiros();
+        void UpdateTiros();
+        
 
 
 

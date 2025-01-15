@@ -19,6 +19,9 @@ class Jogo {
 
         GLfloat getArenaHeight() {
             return this->arena->getHeight();
+        }  
+        GLfloat getArenaWidth() {
+            return this->arena->getWidth();
         }   
 
         Arena* getArena() {

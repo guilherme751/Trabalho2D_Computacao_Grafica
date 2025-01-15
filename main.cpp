@@ -23,6 +23,7 @@ GLfloat positionBeforeJump;
 Tiro* tiro = NULL;
 int keyStatus[256];
 
+
 void keyPress(unsigned char key, int x, int y) {
     switch (key) { 
         case 'a':
@@ -48,6 +49,72 @@ void ResetKeyStatus() {
     for (i = 0; i < 256; i++)
         keyStatus[i] = 0;
 }
+GLfloat clamp(GLfloat value, GLfloat max, GLfloat min) {
+    if (value > max)    return max;
+    if (value < min)   return min;
+    return value;
+}
+bool checkCollisionObstaculoTiro(Tiro* tiro, Obstaculo* obstaculo) {
+    GLfloat cx = tiro->getX(), cy = tiro->getY(), rx = obstaculo->x, ry = obstaculo->y, radius = tiro->radius;
+
+    if (cx + radius > rx && cx - radius < rx + obstaculo->getWidth() &&
+        cy + radius > ry && cy - radius < ry + obstaculo->getHeight()) {
+            return true;
+        }
+    
+    return false;
+}
+
+bool checkCollisionOponenteTiro(Tiro* tiro, Jogador* oponente) {
+    GLfloat cx = tiro->getX(), cy = tiro->getY(), rx = oponente->getX(), ry = oponente->getY(), radius = tiro->radius;
+
+    if (cx + radius > rx && cx - radius < rx + oponente->getWidth() &&
+        cy + radius > ry && cy - radius < ry + oponente->getSize()) {
+            return true;
+        }
+    
+    return false;
+}
+bool tiroValido(Tiro* tiro, Jogador* j)
+{
+    if (!tiro)  return false;
+    if (tiro->getY() > jogo.getArenaHeight() || tiro->getY() < 0 || 
+        tiro->getX() > jogo.getArenaWidth() || tiro->getX() < 0) {
+        return false;
+    }
+
+    for (Obstaculo* obstaculo : jogo.getArena()->getObstaculos()) {
+        if (checkCollisionObstaculoTiro(tiro, obstaculo)) {
+            return false;
+        }
+    }
+
+    if (j == jogador_principal) {
+        for (Jogador* oponente : jogo.getArena()->getOpponents()) {
+            if (checkCollisionOponenteTiro(tiro, oponente)) {
+                oponente->morreu = true;
+                return false;
+            }
+        }
+    } 
+    
+
+    return true;
+}
+
+void verificaTirosValidos(Jogador* j) {
+    std::list<Tiro*>& tiros = jogador_principal->getTiros();
+    // printf("%ld\n", tiros.size()); 
+    for (auto it = tiros.begin(); it != tiros.end(); ) {
+        if (!tiroValido(*it, j)) { 
+            delete *it;         
+            it = tiros.erase(it); 
+        } else {
+            ++it; 
+        }
+    }
+}
+
 
 bool checkCollision(Jogador* jogador, float incX, float incY) {
     std::vector<Obstaculo*> obstaculos = jogo.getArena()->getObstaculos();
@@ -80,16 +147,21 @@ bool checkCollision(Jogador* jogador, float incX, float incY) {
             Y + altura > jogador_bom->getY()) { 
             return false; // Colisão detectada
         }
+        if (X > jogo.getArenaWidth() || X < 0) {
+            return false;
+        }
 
     } else {
         for (Jogador* oponente : jogo.getArena()->getOpponents()) {
-            if (X < oponente->getX() + largura && 
-            X + largura > oponente->getX() && 
-            Y < oponente->getY() + altura && 
-            Y + altura > oponente->getY()) {  
-               
-            return false; // Colisão detectada
-        }
+            if (!oponente->morreu) {
+                if (X < oponente->getX() + largura && 
+                    X + largura > oponente->getX() && 
+                    Y < oponente->getY() + altura && 
+                    Y + altura > oponente->getY()) {  
+                
+                    return false; // Colisão detectada
+                }
+            }
         }
     }
 
@@ -163,16 +235,16 @@ void updatePlayer() {
 void updateOpponents() {
     std::vector<Jogador*> oponentes = jogo.getArena()->getOpponents();
     for (Jogador* opponent : oponentes) {        
+        if (!opponent->morreu) {
+            if (!checkCollision(opponent, opponent->dir*INC_KEYIDLE, 0)){
+                opponent->dir *= -1;
+            }
 
-        if (!checkCollision(opponent, opponent->dir*INC_KEYIDLE, 0)){
-            opponent->dir *= -1;
+            if (checkCollision(opponent, 0, 2*INC_KEYIDLE)) {
+                opponent->dir *= -1;
+            }
+            opponent->MoveEmX(opponent->dir * INC_KEYIDLE*0.4);
         }
-
-        if (checkCollision(opponent, 0, 2*INC_KEYIDLE)) {
-            opponent->dir *= -1;
-        }
-        opponent->MoveEmX(opponent->dir * INC_KEYIDLE*0.4);
-
         
     }
     
@@ -219,9 +291,7 @@ void display() {
     updateCameraView();
     // Chama o método para desenhar todos os elementos
     jogo.Desenha();
-    if (jogador_principal->temTiro()) {
-        
-    }
+    jogador_principal->DesenhaTiros();
     glutSwapBuffers(); // Troca os buffers (Double buffering)
 }
 
@@ -270,6 +340,8 @@ void idle(void)
         }
     }
 
+    jogador_principal->UpdateTiros();
+    verificaTirosValidos(jogador_principal);
     updatePlayer();
     updateOpponents();     
     
