@@ -34,6 +34,10 @@ void keyPress(unsigned char key, int x, int y) {
         case 'D':
             keyStatus[(int)('d')] = 1; 
             break;
+        case 'r':
+        case 'R':
+            keyStatus[(int)('r')] = 1; 
+            break;
     }
     glutPostRedisplay();
 }
@@ -49,11 +53,7 @@ void ResetKeyStatus() {
     for (i = 0; i < 256; i++)
         keyStatus[i] = 0;
 }
-GLfloat clamp(GLfloat value, GLfloat max, GLfloat min) {
-    if (value > max)    return max;
-    if (value < min)   return min;
-    return value;
-}
+
 bool checkCollisionObstaculoTiro(Tiro* tiro, Obstaculo* obstaculo) {
     GLfloat cx = tiro->getX(), cy = tiro->getY(), rx = obstaculo->x, ry = obstaculo->y, radius = tiro->radius;
 
@@ -64,14 +64,23 @@ bool checkCollisionObstaculoTiro(Tiro* tiro, Obstaculo* obstaculo) {
     
     return false;
 }
+bool checkCollisionJogadorTiro(Tiro* tiro) {
+    GLfloat cx = tiro->getX(), cy = tiro->getY(), rx = jogador_principal->getX(), ry = jogador_principal->getY(), radius = tiro->radius;
 
+    if (cx + radius > rx && cx - radius < rx + jogador_principal->getWidth() &&
+        cy + radius > ry && cy - radius < ry + jogador_principal->getSize()) {
+            return true;
+        }
+    
+    return false;
+}
 bool checkCollisionOponenteTiro(Tiro* tiro, Jogador* oponente) {
     GLfloat cx = tiro->getX(), cy = tiro->getY(), rx = oponente->getX(), ry = oponente->getY(), radius = tiro->radius;
-
+    if (oponente->morreu)   return false;
     if (cx + radius > rx && cx - radius < rx + oponente->getWidth() &&
         cy + radius > ry && cy - radius < ry + oponente->getSize()) {
             return true;
-        }
+    }
     
     return false;
 }
@@ -96,14 +105,19 @@ bool tiroValido(Tiro* tiro, Jogador* j)
                 return false;
             }
         }
-    } 
+    } else {
+        if (checkCollisionJogadorTiro(tiro)) {
+            jogador_principal->morreu = true;
+            return false;
+        }
+    }
     
 
     return true;
 }
 
 void verificaTirosValidos(Jogador* j) {
-    std::list<Tiro*>& tiros = jogador_principal->getTiros();
+    std::list<Tiro*>& tiros = j->getTiros();
     // printf("%ld\n", tiros.size()); 
     for (auto it = tiros.begin(); it != tiros.end(); ) {
         if (!tiroValido(*it, j)) { 
@@ -189,7 +203,7 @@ void mouseCallback(int button, int state, int x, int y) {
             }
         } else if (button == GLUT_LEFT_BUTTON) {
             if (state == GLUT_DOWN)
-                jogador_principal->addTiro(jogador_principal->Atira());
+                jogador_principal->addTiro(jogador_principal->Atira(JOGADOR));
         }
 
         glutPostRedisplay();
@@ -270,11 +284,39 @@ void movimentarBracoMouse(int x, int y) {
     glutPostRedisplay();
 }
 
-void timer(int value) {
-    updatePlayer();     
-    // updateOpponents();
-    glutPostRedisplay(); 
-    glutTimerFunc(16, timer, 0); 
+void renderText(float x, float y, const char* text, void* font) {
+    glRasterPos2f(x, y);
+    for (int i = 0; text[i] != '\0'; i++) {
+        glutBitmapCharacter(font, text[i]);
+    }
+}
+void reiniciarJogo() {
+    for (Jogador* oponente : jogo.getArena()->getOpponents()) {
+        oponente->reiniciaPosicao();
+    }
+    jogador_principal->reiniciaPosicao();
+    jogadorX = jogador_principal->getX();
+
+}
+void gameOver(bool vitoria) {
+    if (vitoria) {
+        glColor3f(0.0f, 1.0f, 0.0f); 
+        renderText(jogador_principal->getX(), - jogo.getArenaHeight()/2, "VITORIA", GLUT_BITMAP_HELVETICA_18);
+    } else {
+        glColor3f(1.0f, 0.0f, 0.0f); 
+        renderText(jogador_principal->getX(), - jogo.getArenaHeight()/2, "GAME OVER", GLUT_BITMAP_HELVETICA_18);
+    }
+
+        
+    if (jogo.reiniciar) {
+        reiniciarJogo();
+        jogo.gameOver = false;
+        jogo.vitoria = false;
+        jogo.reiniciar = false;
+        jogo.teste = true;
+        glutPostRedisplay();
+    }   
+
 }
 
 void updateCameraView()
@@ -282,7 +324,6 @@ void updateCameraView()
     glMatrixMode(GL_MODELVIEW); // Switch to the model-view matrix
     glLoadIdentity();          // Reset the matrix
 
-    // Translate the world so the player is always centered
     glTranslatef(-jogadorX, 0, 0);
 }
 
@@ -292,6 +333,14 @@ void display() {
     // Chama o método para desenhar todos os elementos
     jogo.Desenha();
     jogador_principal->DesenhaTiros();
+    for (Jogador* oponente : jogo.getArena()->getOpponents()) {
+        oponente->DesenhaTiros();
+    }
+
+    if (jogo.gameOver) {
+        gameOver(jogo.vitoria);
+    }
+
     glutSwapBuffers(); // Troca os buffers (Double buffering)
 }
 
@@ -312,7 +361,7 @@ void init(void)
             -100,                 // Z coordinate of the “near” plane
             100);                 // Z coordinate of the “far” plane
             
-    // glOrtho(-500, 500, -500, 500, -100, 100);
+    // glOrtho(-300, 300, -300, 300, -100, 100);
     glMatrixMode(GL_MODELVIEW);   // Select the projection matrix
     glLoadIdentity();
 }
@@ -322,28 +371,48 @@ void idle(void)
 {
     double inc = INC_KEYIDLE; 
     GLfloat size = jogador_principal->getWidth();
-    if (keyStatus[(int)('a')])
-    {
+    if (keyStatus[(int)('a')]) {
         if (jogadorX -size*0.15 > inc && checkCollision(jogador_principal, -inc, 0)) {
             
             jogadorX = jogador_principal->MoveEmX(-inc);
         }
     }
-    if (keyStatus[(int)('d')])
-    {
+    if (keyStatus[(int)('d')]) {
         if (jogadorX - size*0.15 > jogo.getArena()->getWidth()) {
             
-            printf("GANHOU!!\n");
+            jogo.gameOver = true;
+            jogo.vitoria = true;
         }
         if (checkCollision(jogador_principal, inc, 0)) {
             jogadorX = jogador_principal->MoveEmX(inc);
         }
     }
+    if (keyStatus[(int)('r')]) {
+        if (jogo.gameOver)
+            jogo.reiniciar = true;
+    }
 
     jogador_principal->UpdateTiros();
     verificaTirosValidos(jogador_principal);
+
+    for (Jogador* jogador : jogo.getArena()->getOpponents()) {
+        Tiro* tiro = jogador->Atira(OPONENTE);
+        
+        if (tiro) {
+            jogador->addTiro(tiro);
+        }
+        jogador->updateAngleOponente(jogador_principal, jogo.getArenaHeight());
+        jogador->UpdateTiros();
+        verificaTirosValidos(jogador);
+    }
+
     updatePlayer();
-    updateOpponents();     
+    updateOpponents(); 
+
+    if (jogador_principal->morreu) {
+        jogo.gameOver = true;
+        jogo.vitoria = false;
+    }
     
     glutPostRedisplay();
 }

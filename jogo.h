@@ -7,11 +7,16 @@
 
 class Jogo {
 
-    Arena* arena;   
+    Arena* arena; 
+      
 
     private:
         void DesenhaJogo(Arena* arena);
     public:
+        bool gameOver = false;
+        bool vitoria = false;
+        bool reiniciar = false;
+        bool teste = false;
         void CarregarArquivoSVG(const char* caminho);
         void Desenha() {
             DesenhaJogo(this->arena);

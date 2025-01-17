@@ -13,9 +13,7 @@ void Arena::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLf
 }
 
 void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B) {
-    
-    glPushMatrix();
-        
+    glPushMatrix();        
         glRotatef(180, 1, 0, 0);
         glPushMatrix();
             glTranslatef(x, y, 0);
@@ -23,12 +21,15 @@ void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat height, GLfloat width, GL
         glPopMatrix();
         for (Obstaculo* obstaculo : this->obstaculos) {
                 obstaculo->Desenha();
-            }
+        }
         for (Jogador* oponente : this->oponentes) {
             if (!oponente->morreu)
                 oponente->Desenha(OPONENTE);
         }
-        this->jogador->Desenha(JOGADOR);
+        if (!this->jogador->morreu) {
+            this->jogador->Desenha(JOGADOR);
+        }
+        
 
     glPopMatrix();
 }
@@ -53,5 +54,7 @@ void Arena::AtualizaCoordenadas() {
 
     this->x = 0;
     this->y = 0;
+
+    
 
 }

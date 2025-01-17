@@ -64,6 +64,7 @@ void Jogo::CarregarArquivoSVG(const char* caminho) {
 }
 
 void Jogo::DesenhaJogo(Arena* arena) {
+    if (teste)  arena->teste = true;
     if (arena) {
         arena->Desenha(); // Desenha a arena
     }

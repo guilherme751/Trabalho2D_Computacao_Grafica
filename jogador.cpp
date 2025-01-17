@@ -1,6 +1,13 @@
 #include "jogador.h"
 #include <math.h>
 #include <stdio.h>
+#include <random>
+
+GLfloat distanciaEntrePontos(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2) {
+    GLfloat dx = x2 - x1;
+    GLfloat dy = y2 - y1;
+    return std::sqrt(dx * dx + dy * dy);
+}
 
 void Jogador::DesenhaCirc(GLfloat size, GLfloat R, GLfloat G, GLfloat B) {
     glColor3f(R, G, B);
@@ -81,7 +88,7 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size, GLfloat angle) 
 
 
 
-void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size) {
+void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size, GLfloat angle) {
     
 
     glPushMatrix();
@@ -97,7 +104,7 @@ void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size) {
 
             glPushMatrix();
                 glTranslatef(0, bodyHeight/2, 0);
-                glRotatef(100, 0, 0, 1);
+                glRotatef(angle, 0, 0, 1);
                 DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 255, 0); // desenha o braço
             glPopMatrix();
             glPushMatrix();
@@ -150,7 +157,7 @@ void RotatePoint(GLfloat x, GLfloat y, GLfloat angle, GLfloat &xOut, GLfloat &yO
 // glTranslatef(0,  dim_proporcional/2, 0);
 // glTranslatef(0, bodyHeight/2, 0);
 
-Tiro* Jogador::Atira() {
+Tiro* Jogador::AtiraJogador() {
     
 
     GLfloat baseX = 0, baseY = 0;
@@ -173,7 +180,38 @@ Tiro* Jogador::Atira() {
 
     return new Tiro(tiroX, tiroY, atan2(tiroY-baseY, tiroX-baseX) * 180.0 / M_PI);
 }
+std::random_device rd;  // Fonte de aleatoriedade
+std::mt19937 gen(rd()); // Gerador de números aleatórios
+std::uniform_real_distribution<float> dist(0.0, 1.0); 
 
+Tiro* Jogador::AtiraOponente() {
+    
+    float randomNumber = dist(gen);
+    if (randomNumber < 0.03 && this->oponente_dentro_visao && !this->morreu) {
+    
+        GLfloat baseX = 0, baseY = 0;
+        RotatePoint(baseX, baseY, angle, baseX, baseY);
+        baseX += this->x;
+        baseY += bodyHeight/2;
+        baseY += dim_proporcional/2;
+        baseY += -total_size + dim_proporcional/2;
+        baseY += this->y + dist2base;
+
+        GLfloat tiroX = 0, tiroY = arm_leg_Height;
+
+        RotatePoint(tiroX, tiroY, angle, tiroX, tiroY);
+        tiroX += this->x;
+        tiroY += bodyHeight/2;
+        tiroY += dim_proporcional/2;
+        tiroY += -total_size + dim_proporcional/2;
+        tiroY += this->y + dist2base;
+
+
+        return new Tiro(tiroX, tiroY, atan2(tiroY-baseY, tiroX-baseX) * 180.0 / M_PI);
+    } else {
+        return NULL;
+    }
+}
 
 void Jogador::DesenhaTiros(){
     for (Tiro* tiro : tiros) {       
@@ -186,6 +224,31 @@ void Jogador::UpdateTiros() {
     for (Tiro* tiro : tiros) {
         tiro->Move(5.0);
     }
+}
+GLfloat normalizaAngulo(GLfloat angulo) {
+    while (angulo < 0) angulo += 360;
+    while (angulo >= 360) angulo -= 360;
+    return angulo;
+}
+void Jogador::updateAngleOponente(Jogador* jogador_principal, GLfloat view_width) {
+    if (this->x - jogador_principal->x  <= view_width/1.9) {
+            this->oponente_dentro_visao = true;
+            GLfloat angle_temp = atan2(jogador_principal->y - this->y, jogador_principal->x - this->x)* 180.0/M_PI - 90;
+            angle_temp = normalizaAngulo(angle_temp);
+            
+            if (angle_temp < 40) {
+                angle_temp = 40;
+            } else if (angle_temp > 130) {
+                angle_temp = 130;
+            }    
+
+            this->angle = angle_temp;        
+    }
+    else {
+        this->oponente_dentro_visao = false;
+    }
+    
+    
 }
 
 

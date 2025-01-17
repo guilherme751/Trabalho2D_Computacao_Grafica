@@ -17,6 +17,8 @@ class Obstaculo {
                         GLfloat R, GLfloat G, GLfloat B);
 
     public:
+        GLfloat x_init;
+        GLfloat y_init;
         GLfloat x;  
         GLfloat y; 
         Obstaculo(GLfloat height, GLfixed width, GLfloat x, GLfloat y) {
@@ -24,6 +26,8 @@ class Obstaculo {
             this->width = width;
             this->x = x;
             this->y = y;
+            this->x_init = x;
+            this->y_init = y;
         }
 
         void Desenha() {

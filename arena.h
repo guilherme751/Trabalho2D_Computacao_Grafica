@@ -22,6 +22,7 @@ class Arena {
                         GLfloat R, GLfloat G, GLfloat B);
 
     public:
+    bool teste = false;
         Arena(GLfloat height, GLfloat width, GLfloat x, GLfloat y) {
             this->height = height;
             this->width = width;

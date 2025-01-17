@@ -2,12 +2,15 @@
 #define JOGADOR_h
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <stdio.h>
 #include <list> 
 #include "tiro.h"
 #define JOGADOR 1
 #define OPONENTE 2
 #define PROPORCAO 0.3
 class Jogador {
+    GLfloat x_init;
+    GLfloat y_init;
     GLfloat x;
     GLfloat y;
     GLfloat size; 
@@ -20,6 +23,9 @@ class Jogador {
     GLfloat arm_leg_Width;
     GLfloat dist2base;
     std::list<Tiro*> tiros;
+    GLfloat tempoUltimoTiro;
+    GLfloat tempoEntreTiros;
+    
     
 
     private:
@@ -27,11 +33,14 @@ class Jogador {
                         GLfloat R, GLfloat G, GLfloat B);
         void DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B);
         void DesenhaJogador(GLfloat x, GLfloat y, GLfloat size, GLfloat angle);
-        void DesenhaOponente(GLfloat x, GLfloat y, GLfloat size);
+        void DesenhaOponente(GLfloat x, GLfloat y, GLfloat size, GLfloat angle);
+        Tiro* AtiraOponente();
+        Tiro* AtiraJogador();
 
     public:
         int dir;
         bool morreu;
+        bool oponente_dentro_visao;
         Jogador(GLfloat x, GLfloat y, GLfloat size) {
             this->x = x;
             this->y = y;
@@ -45,13 +54,16 @@ class Jogador {
             this->arm_leg_Width = this->dim_proporcional*0.2;
             this->dist2base = size/2;
             this->total_size = this->dim_proporcional + this->bodyHeight + 2*this->arm_leg_Height;
-            this->morreu = false;
+            this->morreu = false;            
+            this->oponente_dentro_visao = false;
+            this->x_init = x;
+            this->y_init = y;
         }
         void Desenha(int tipo) {
             if (tipo == JOGADOR)
                 DesenhaJogador(this->x, this->y, this->size, this->angle);
             else if (tipo == OPONENTE) {
-                DesenhaOponente(this->x, this->y, this->size);
+                DesenhaOponente(this->x, this->y, this->size, this->angle);
             }
         }
         GLfloat MoveEmX(GLfloat dx);
@@ -79,9 +91,11 @@ class Jogador {
 
         void updateX(GLfloat x_arena) {
             this->x = this->x - x_arena;
+            this->x_init = this->x;
         }
         void updateY(GLfloat y_arena) {
-            this->y = this->y - y_arena;            
+            this->y = this->y - y_arena;     
+            this->y_init = this->y;       
         }
 
         GLfloat updateAngle(GLfloat angle) {
@@ -102,7 +116,15 @@ class Jogador {
         }
 
         
-        Tiro* Atira();
+        Tiro* Atira(int tipo) {
+            if (tipo == JOGADOR) {
+                return AtiraJogador();
+            }
+            else if (tipo == OPONENTE) {
+                return AtiraOponente();
+            }
+            return NULL;
+        }
 
         bool temTiro() {
             if (tiros.size() > 0) {
@@ -115,8 +137,13 @@ class Jogador {
 
         void DesenhaTiros();
         void UpdateTiros();
-        
+        void updateAngleOponente(Jogador* jogador_principal, GLfloat view_width);
 
+        void reiniciaPosicao() {
+            this->x = this->x_init;
+            this->y = this->y_init;
+            this->morreu = false;
+        }
 
 
 };
