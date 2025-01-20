@@ -46,6 +46,7 @@ void Jogo::CarregarArquivoSVG(const char* caminho) {
                 GLfloat y = element->FloatAttribute("cy");
                 GLfloat raio = element->FloatAttribute("r");
                 Jogador* jogador = new Jogador(x, y, raio*2);
+                jogador->oponente = false;
                 this->arena->setJogador(jogador);
             }
             else if (fill && std::string(fill) == "red") {
@@ -53,6 +54,7 @@ void Jogo::CarregarArquivoSVG(const char* caminho) {
                 GLfloat y = element->FloatAttribute("cy");
                 GLfloat raio = element->FloatAttribute("r");
                 Jogador* jogador = new Jogador(x, y, raio*2);
+                jogador->oponente = true;
                 this->arena->addOponente(x, y, raio*2);
             }
 

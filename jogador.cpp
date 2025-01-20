@@ -60,22 +60,22 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size, GLfloat angle) 
             glPopMatrix();
             glPushMatrix();
                 glTranslatef(0, bodyHeight, 0);
-                glRotatef(0, 0, 0, 1);
-                DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 0, 0);
+                glRotatef(this->angle_left_leg1, 0, 0, 1);
+                DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 0, 0); // parte superior da perna esquerda
 
                 glTranslatef(0, arm_leg_Height, 0);
-                glRotatef(0, 0, 0, 1);
-                DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 0, 0);
+                glRotatef(this->angle_left_leg2, 0, 0, 1);
+                DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 0, 0); // parte inferior da perna esquerda
             glPopMatrix();
 
             glPushMatrix();
                 glTranslatef(0, bodyHeight, 0);
-                glRotatef(-30, 0, 0, 1);
-                DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 0, 0);
+                glRotatef(this->angle_right_leg1, 0, 0, 1);
+                DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 0, 0); // parte superior da perna direita
 
                 glTranslatef(0, arm_leg_Height, 0);
-                glRotatef(60, 0, 0, 1);
-                DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 0, 0);
+                glRotatef(this->angle_right_leg2, 0, 0, 1);
+                DesenhaRect(arm_leg_Height, arm_leg_Width, 255, 0, 0); // parte inferior da perna direita
             glPopMatrix();
 
 
@@ -109,21 +109,21 @@ void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size, GLfloat angle)
             glPopMatrix();
             glPushMatrix();
                 glTranslatef(0, bodyHeight, 0);
-                glRotatef(30, 0, 0, 1);
+                glRotatef(this->angle_left_leg1, 0, 0, 1);
                 DesenhaRect(arm_leg_Height, arm_leg_Width, 0, 255, 0);
 
                 glTranslatef(0, arm_leg_Height, 0);
-                glRotatef(30, 0, 0, 1);
+                glRotatef(this->angle_left_leg2, 0, 0, 1);
                 DesenhaRect(arm_leg_Height, arm_leg_Width, 0, 255, 0);
             glPopMatrix();
 
             glPushMatrix();
                 glTranslatef(0, bodyHeight, 0);
-                glRotatef(-30, 0, 0, 1);
+                glRotatef(this->angle_right_leg1, 0, 0, 1);
                 DesenhaRect(arm_leg_Height, arm_leg_Width, 0, 255, 0);
 
                 glTranslatef(0, arm_leg_Height, 0);
-                glRotatef(60, 0, 0, 1);
+                glRotatef(this->angle_right_leg2, 0, 0, 1);
                 DesenhaRect(arm_leg_Height, arm_leg_Width, 0, 255, 0);
             glPopMatrix();
 
@@ -135,27 +135,54 @@ void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size, GLfloat angle)
     glPopMatrix();
 }
 
+void Jogador::updateAngulosPerna(GLfloat dx) {    
+        if (this->left_leg_up) {
+            this->angle_left_leg1 -= 4*dx;
+            this->angle_right_leg1 += 4*dx;
 
-GLfloat Jogador::MoveEmX(GLfloat dx) {
-    Jogador::x += dx; 
+
+            // this->angle_left_leg2 -= 1;
+            
+            // this->angle_right_leg2 -= 0.2;
+
+            if (this->angle_left_leg1 < -36 && this->angle_right_leg1 > 36 ) {
+                this->left_leg_up = false;       
+            }
+        } else {
+            
+            this->angle_right_leg1 -= 4*dx;
+            // this->angle_right_leg2 -= 0.2;
+            this->angle_left_leg1 += 4*dx;
+            // this->angle_left_leg2 -= 0.2;
+            if (this->angle_right_leg1 < -36 && this->angle_left_leg1 > 36 ) {
+                this->left_leg_up  = true;     
+            }
+
+        }   
+
+}
+
+GLfloat Jogador::MoveEmX(GLfloat dx, GLdouble timeDiference, bool jump_or_falling) {
+    // if (!jump_or_falling)
+    //     updateAngulosPerna(abs(dx));
+    if (timeDiference > 100)    timeDiference = 1;
+    Jogador::x += dx * timeDiference * this->vel;
     return Jogador::x;  
 }
 
-GLfloat Jogador::MoveEmY(GLfloat dy) {
-    Jogador::y += dy;    
+GLfloat Jogador::MoveEmY(GLfloat dy, GLdouble timeDiference) {
+    if (timeDiference != 0)
+        dy = dy/timeDiference;
+    Jogador::y += dy * timeDiference;    
     return Jogador::y;  
 }
 
 void RotatePoint(GLfloat x, GLfloat y, GLfloat angle, GLfloat &xOut, GLfloat &yOut){
     xOut = cos(angle * M_PI/180)*x - sin(angle * M_PI/180)*y;
-    yOut = sin(angle * M_PI/180)*x + cos(angle * M_PI/180)*y;
-    
+    yOut = sin(angle * M_PI/180)*x + cos(angle * M_PI/180)*y;    
 }
 
-// glTranslatef(x, y+dist2base, 0); 
-// glTranslatef(0, -total_size + dim_proporcional/2, 0); 
-// glTranslatef(0,  dim_proporcional/2, 0);
-// glTranslatef(0, bodyHeight/2, 0);
+
 
 Tiro* Jogador::AtiraJogador() {
     
@@ -187,7 +214,7 @@ std::uniform_real_distribution<float> dist(0.0, 1.0);
 Tiro* Jogador::AtiraOponente() {
     
     float randomNumber = dist(gen);
-    if (randomNumber < 0.03 && this->oponente_dentro_visao && !this->morreu) {
+    if (randomNumber < 0 && this->oponente_dentro_visao && !this->morreu) {
     
         GLfloat baseX = 0, baseY = 0;
         RotatePoint(baseX, baseY, angle, baseX, baseY);
@@ -219,10 +246,10 @@ void Jogador::DesenhaTiros(){
     }
 }
 
-void Jogador::UpdateTiros() {
+void Jogador::UpdateTiros(GLfloat timeDifference) {
 
     for (Tiro* tiro : tiros) {
-        tiro->Move(5.0);
+        tiro->Move(timeDifference);
     }
 }
 GLfloat normalizaAngulo(GLfloat angulo) {
@@ -250,5 +277,8 @@ void Jogador::updateAngleOponente(Jogador* jogador_principal, GLfloat view_width
     
     
 }
+
+
+
 
 

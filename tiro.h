@@ -26,7 +26,7 @@ public:
         this->x = x; 
         this->y = y; 
         this->directionAng = directionAng; 
-        this->vel = 1.5;
+        this->vel = 1;
         this->desenhado = false;
         this->radius = radiusTiro;
     };

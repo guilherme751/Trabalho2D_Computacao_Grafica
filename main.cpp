@@ -8,10 +8,12 @@
 #include <iostream>
 #include "jogo.h"
 #include "arena.h"
+#include <random>
 
 
 #define INC_KEYIDLE 0.5
 // Window dimensions
+
 const GLint Width = 800;
 const GLint Height = 800;
 GLfloat visDim;
@@ -177,6 +179,9 @@ bool checkCollision(Jogador* jogador, float incX, float incY) {
                 }
             }
         }
+        if (X + jogador_principal->getWidth() > jogo.getArenaWidth() || X < 0) {
+            return false;
+        }
     }
 
     return true; 
@@ -209,12 +214,13 @@ void mouseCallback(int button, int state, int x, int y) {
         glutPostRedisplay();
     
 }
-void updatePlayer() {
+void updatePlayer(GLdouble timeDiference) {
     if (isJumping) {
         if (wayup) {
             if (positionBeforeJump - jogador_principal->getY() < 3*jogador_principal->getSize()) {
                 if (checkCollision(jogador_principal, 0, -inc)) {
-                    jogador_principal->MoveEmY(-inc);
+            
+                    jogador_principal->MoveEmY(-inc, timeDiference);
                     // inc = inc - 0.003;
                 } 
                 else {
@@ -229,7 +235,7 @@ void updatePlayer() {
         } 
         else {
             if (checkCollision(jogador_principal, 0, INC_KEYIDLE)) {
-                jogador_principal->MoveEmY(INC_KEYIDLE);
+                jogador_principal->MoveEmY(INC_KEYIDLE, timeDiference);
             }
             else {
                 isJumping = false;
@@ -238,7 +244,7 @@ void updatePlayer() {
     } else {
         if (checkCollision(jogador_principal, 0, INC_KEYIDLE)) {
             falling = true;
-            jogador_principal->MoveEmY(INC_KEYIDLE);
+            jogador_principal->MoveEmY(INC_KEYIDLE, timeDiference);
         } else {
             falling = false;
         }
@@ -246,18 +252,21 @@ void updatePlayer() {
     
 }
 
-void updateOpponents() {
+void updateOpponents(GLdouble timeDiference) {
+    
     std::vector<Jogador*> oponentes = jogo.getArena()->getOpponents();
     for (Jogador* opponent : oponentes) {        
         if (!opponent->morreu) {
-            if (!checkCollision(opponent, opponent->dir*INC_KEYIDLE, 0)){
+            if (!checkCollision(opponent, opponent->dir*timeDiference*opponent->vel, 0)){
                 opponent->dir *= -1;
             }
 
             if (checkCollision(opponent, 0, 2*INC_KEYIDLE)) {
                 opponent->dir *= -1;
             }
-            opponent->MoveEmX(opponent->dir * INC_KEYIDLE*0.4);
+            
+            opponent->MoveEmX(opponent->dir, timeDiference*0.3, isJumping || falling);
+           
         }
         
     }
@@ -301,10 +310,13 @@ void reiniciarJogo() {
 void gameOver(bool vitoria) {
     if (vitoria) {
         glColor3f(0.0f, 1.0f, 0.0f); 
-        renderText(jogador_principal->getX(), - jogo.getArenaHeight()/2, "VITORIA", GLUT_BITMAP_HELVETICA_18);
+        renderText(jogador_principal->getX(), - jogo.getArenaHeight()/2, "VICTORY!", GLUT_BITMAP_HELVETICA_18);
+        renderText(jogador_principal->getX(), - jogo.getArenaHeight()/2 - 2.5, "Press R to Restart", GLUT_BITMAP_HELVETICA_18);
     } else {
         glColor3f(1.0f, 0.0f, 0.0f); 
-        renderText(jogador_principal->getX(), - jogo.getArenaHeight()/2, "GAME OVER", GLUT_BITMAP_HELVETICA_18);
+        renderText(jogador_principal->getX(), - jogo.getArenaHeight()/2, "GAME OVER!", GLUT_BITMAP_HELVETICA_18);
+        renderText(jogador_principal->getX(), - jogo.getArenaHeight()/2 - 2.5, "Press R to Try Again", GLUT_BITMAP_HELVETICA_18);
+
     }
 
         
@@ -319,6 +331,14 @@ void gameOver(bool vitoria) {
 
 }
 
+void pontuacao() {
+    char buffer[100];
+    glColor3f(255, 255, 255);
+    sprintf(buffer, "Enemies Alive: %d/%ld", jogo.getArena()->contaOponentesVivos(), 
+                                            jogo.getArena()->getOpponents().size());
+
+    renderText(jogador_principal->getX(), -5, buffer, GLUT_BITMAP_9_BY_15); 
+}
 void updateCameraView()
 {
     glMatrixMode(GL_MODELVIEW); // Switch to the model-view matrix
@@ -326,7 +346,6 @@ void updateCameraView()
 
     glTranslatef(-jogadorX, 0, 0);
 }
-
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Limpa a tela
     updateCameraView();
@@ -340,6 +359,9 @@ void display() {
     if (jogo.gameOver) {
         gameOver(jogo.vitoria);
     }
+
+    pontuacao();
+    
 
     glutSwapBuffers(); // Troca os buffers (Double buffering)
 }
@@ -369,22 +391,32 @@ void init(void)
 
 void idle(void)
 {
-    double inc = INC_KEYIDLE; 
+
+    static GLdouble previousTime = 0;
+    GLdouble currentTime;
+    GLdouble timeDiference;
+    
+    currentTime = glutGet(GLUT_ELAPSED_TIME);
+    timeDiference = currentTime - previousTime; 
+   
+    previousTime = currentTime; 
+    
+    double inc = jogador_principal->vel * timeDiference; 
     GLfloat size = jogador_principal->getWidth();
     if (keyStatus[(int)('a')]) {
-        if (jogadorX -size*0.15 > inc && checkCollision(jogador_principal, -inc, 0)) {
-            
-            jogadorX = jogador_principal->MoveEmX(-inc);
+        if (checkCollision(jogador_principal, -inc, 0)) {
+            jogadorX = jogador_principal->MoveEmX(-1, timeDiference, isJumping || falling);
         }
     }
     if (keyStatus[(int)('d')]) {
-        if (jogadorX - size*0.15 > jogo.getArena()->getWidth()) {
-            
-            jogo.gameOver = true;
-            jogo.vitoria = true;
+        if (jogadorX + jogador_principal->getWidth() > jogo.getArena()->getWidth()) {
+            if (jogo.getArena()->contaOponentesVivos() == 0) {
+                jogo.gameOver = true;
+                jogo.vitoria = true;
+            }
         }
         if (checkCollision(jogador_principal, inc, 0)) {
-            jogadorX = jogador_principal->MoveEmX(inc);
+            jogadorX = jogador_principal->MoveEmX(1, timeDiference, isJumping || falling);
         }
     }
     if (keyStatus[(int)('r')]) {
@@ -392,7 +424,7 @@ void idle(void)
             jogo.reiniciar = true;
     }
 
-    jogador_principal->UpdateTiros();
+    jogador_principal->UpdateTiros(timeDiference);
     verificaTirosValidos(jogador_principal);
 
     for (Jogador* jogador : jogo.getArena()->getOpponents()) {
@@ -402,12 +434,12 @@ void idle(void)
             jogador->addTiro(tiro);
         }
         jogador->updateAngleOponente(jogador_principal, jogo.getArenaHeight());
-        jogador->UpdateTiros();
+        jogador->UpdateTiros(timeDiference);
         verificaTirosValidos(jogador);
     }
 
-    updatePlayer();
-    updateOpponents(); 
+    updatePlayer(timeDiference);
+    updateOpponents(timeDiference); 
 
     if (jogador_principal->morreu) {
         jogo.gameOver = true;

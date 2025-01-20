@@ -75,6 +75,14 @@ class Arena {
             return this->oponentes;
         }
 
+        int contaOponentesVivos() {
+            int vivos = 0;
+            for (Jogador* oponente : oponentes) {
+                if (!oponente->morreu)  vivos++;
+            }
+            return vivos;
+        }
+
 
 
 };

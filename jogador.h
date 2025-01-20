@@ -25,6 +25,11 @@ class Jogador {
     std::list<Tiro*> tiros;
     GLfloat tempoUltimoTiro;
     GLfloat tempoEntreTiros;
+    GLfloat angle_left_leg1;
+    GLfloat angle_right_leg1;
+    GLfloat angle_left_leg2;
+    GLfloat angle_right_leg2;
+
     
     
 
@@ -38,9 +43,12 @@ class Jogador {
         Tiro* AtiraJogador();
 
     public:
+        GLfloat vel;
         int dir;
+        bool oponente;
         bool morreu;
         bool oponente_dentro_visao;
+        bool left_leg_up;
         Jogador(GLfloat x, GLfloat y, GLfloat size) {
             this->x = x;
             this->y = y;
@@ -58,6 +66,12 @@ class Jogador {
             this->oponente_dentro_visao = false;
             this->x_init = x;
             this->y_init = y;
+            this->angle_left_leg1 = 30;
+            this->angle_left_leg2 = 20;
+            this->angle_right_leg1 = -30;
+            this->angle_right_leg2 = 20;
+            this->left_leg_up = true;
+            this->vel = 0.05;
         }
         void Desenha(int tipo) {
             if (tipo == JOGADOR)
@@ -66,8 +80,8 @@ class Jogador {
                 DesenhaOponente(this->x, this->y, this->size, this->angle);
             }
         }
-        GLfloat MoveEmX(GLfloat dx);
-        GLfloat MoveEmY(GLfloat dy);
+        GLfloat MoveEmX(GLfloat dx, GLdouble timeDiference, bool jump_or_falling);
+        GLfloat MoveEmY(GLfloat dy, GLdouble timeDiference);
 
         GLfloat getX() {
             return this->x - size*0.15;
@@ -136,7 +150,7 @@ class Jogador {
         }
 
         void DesenhaTiros();
-        void UpdateTiros();
+        void UpdateTiros(GLfloat timeDifference);
         void updateAngleOponente(Jogador* jogador_principal, GLfloat view_width);
 
         void reiniciaPosicao() {
@@ -144,6 +158,8 @@ class Jogador {
             this->y = this->y_init;
             this->morreu = false;
         }
+
+        void updateAngulosPerna(GLfloat dx);
 
 
 };
