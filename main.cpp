@@ -214,37 +214,35 @@ void mouseCallback(int button, int state, int x, int y) {
         glutPostRedisplay();
     
 }
-void updatePlayer(GLdouble timeDiference) {
+void updatePlayer(GLdouble timeDiference, GLfloat dy) {
     if (isJumping) {
         if (wayup) {
             if (positionBeforeJump - jogador_principal->getY() < 3*jogador_principal->getSize()) {
-                if (checkCollision(jogador_principal, 0, -inc)) {
+                if (checkCollision(jogador_principal, 0, -dy)) {
             
-                    jogador_principal->MoveEmY(-inc, timeDiference);
-                    // inc = inc - 0.003;
+                    jogador_principal->MoveEmY(-1, timeDiference);
+                    
                 } 
                 else {
-                    wayup = false;
-                    inc = INC_KEYIDLE;
+                    wayup = false;                    
                 }
             } 
             else {
-                wayup = false;
-                inc = INC_KEYIDLE;
+                wayup = false;                
             }
         } 
         else {
-            if (checkCollision(jogador_principal, 0, INC_KEYIDLE)) {
-                jogador_principal->MoveEmY(INC_KEYIDLE, timeDiference);
+            if (checkCollision(jogador_principal, 0, dy)) {
+                jogador_principal->MoveEmY(1, timeDiference);
             }
             else {
                 isJumping = false;
             }
         }      
     } else {
-        if (checkCollision(jogador_principal, 0, INC_KEYIDLE)) {
+        if (checkCollision(jogador_principal, 0, dy)) {
             falling = true;
-            jogador_principal->MoveEmY(INC_KEYIDLE, timeDiference);
+            jogador_principal->MoveEmY(1, timeDiference);
         } else {
             falling = false;
         }
@@ -400,7 +398,6 @@ void idle(void)
     timeDiference = currentTime - previousTime; 
    
     previousTime = currentTime; 
-    
     double inc = jogador_principal->vel * timeDiference; 
     GLfloat size = jogador_principal->getWidth();
     if (keyStatus[(int)('a')]) {
@@ -438,7 +435,7 @@ void idle(void)
         verificaTirosValidos(jogador);
     }
 
-    updatePlayer(timeDiference);
+    updatePlayer(timeDiference, inc);
     updateOpponents(timeDiference); 
 
     if (jogador_principal->morreu) {

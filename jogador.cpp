@@ -163,17 +163,16 @@ void Jogador::updateAngulosPerna(GLfloat dx) {
 }
 
 GLfloat Jogador::MoveEmX(GLfloat dx, GLdouble timeDiference, bool jump_or_falling) {
-    // if (!jump_or_falling)
-    //     updateAngulosPerna(abs(dx));
     if (timeDiference > 100)    timeDiference = 1;
+    if (!jump_or_falling)
+        updateAngulosPerna(timeDiference * this->vel);
     Jogador::x += dx * timeDiference * this->vel;
     return Jogador::x;  
 }
 
 GLfloat Jogador::MoveEmY(GLfloat dy, GLdouble timeDiference) {
-    if (timeDiference != 0)
-        dy = dy/timeDiference;
-    Jogador::y += dy * timeDiference;    
+    if (timeDiference > 100)    timeDiference = 1;
+    Jogador::y += dy * timeDiference * this->vel;    
     return Jogador::y;  
 }
 

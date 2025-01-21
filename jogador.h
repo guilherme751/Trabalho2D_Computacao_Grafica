@@ -71,7 +71,7 @@ class Jogador {
             this->angle_right_leg1 = -30;
             this->angle_right_leg2 = 20;
             this->left_leg_up = true;
-            this->vel = 0.05;
+            this->vel = 0.0185;
         }
         void Desenha(int tipo) {
             if (tipo == JOGADOR)
