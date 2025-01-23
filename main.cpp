@@ -272,24 +272,34 @@ void updateOpponents(GLdouble timeDiference) {
 }
 int ultimaPosMouseY = 0; 
 void movimentarBracoMouse(int x, int y) {
-    y = Height - y; 
+    ; // Inverter o eixo Y para corresponder ao sistema de coordenadas da tela
+
     Jogador* jogador = jogador_principal;
     GLfloat anguloBraco = jogador->getAngle();
-    if (y < ultimaPosMouseY) {
-        if (anguloBraco + 2.0 < -40) {          
-            anguloBraco = jogador->updateAngle(0.5);
-        }
-    } else if (y > ultimaPosMouseY) {
 
-        if (anguloBraco - 2.0 >= -130) {          
-            anguloBraco = jogador->updateAngle(-0.5);
+    // Calcular o delta do movimento vertical do mouse
+    int deltaY = y - ultimaPosMouseY;
+
+    // Ajustar o ângulo com base no delta, normalizando a velocidade
+    GLfloat anguloIncremento = deltaY * 0.2f; // Fator de escala para controlar a velocidade
+
+    if (anguloIncremento > 0) { // Movimento para cima
+        if (anguloBraco + anguloIncremento < -40) {          
+            anguloBraco = jogador->updateAngle(anguloIncremento);
+        }
+    } else if (anguloIncremento < 0) { // Movimento para baixo
+        if (anguloBraco + anguloIncremento >= -130) {          
+            anguloBraco = jogador->updateAngle(anguloIncremento);
         }
     }
 
+    // Atualizar a posição anterior do mouse
     ultimaPosMouseY = y;
 
+    // Solicitar redesenho
     glutPostRedisplay();
 }
+
 
 void renderText(float x, float y, const char* text, void* font) {
     glRasterPos2f(x, y);

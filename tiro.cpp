@@ -39,7 +39,6 @@ void Tiro::Move(GLdouble timeDifference)
     
     GLfloat dX = cos(directionAng * M_PI / 180.0);
     GLfloat dY = sin(directionAng * M_PI / 180.0);
-    printf("%f, %f, %f\n", dX, this->vel, timeDifference);
     x = x + dX*vel*timeDifference;
     y = y + dY*vel*timeDifference;
    
