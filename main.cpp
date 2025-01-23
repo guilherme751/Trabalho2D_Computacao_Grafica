@@ -263,7 +263,7 @@ void updateOpponents(GLdouble timeDiference) {
                 opponent->dir *= -1;
             }
             
-            opponent->MoveEmX(opponent->dir, timeDiference*0.3, isJumping || falling);
+            opponent->MoveEmX(opponent->dir, timeDiference*0.5, isJumping || falling);
            
         }
         

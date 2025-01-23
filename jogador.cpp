@@ -213,7 +213,7 @@ std::uniform_real_distribution<float> dist(0.0, 1.0);
 Tiro* Jogador::AtiraOponente() {
     
     float randomNumber = dist(gen);
-    if (randomNumber < 0 && this->oponente_dentro_visao && !this->morreu) {
+    if (randomNumber < 0.05 && this->oponente_dentro_visao && !this->morreu) {
     
         GLfloat baseX = 0, baseY = 0;
         RotatePoint(baseX, baseY, angle, baseX, baseY);
