@@ -14,8 +14,8 @@
 #define INC_KEYIDLE 0.5
 // Window dimensions
 
-const GLint Width = 800;
-const GLint Height = 800;
+const GLint Width = 500;
+const GLint Height = 500;
 GLfloat visDim;
 GLfloat jogadorX;
 Jogo jogo;
@@ -166,6 +166,17 @@ bool checkCollision(Jogador* jogador, float incX, float incY) {
         if (X > jogo.getArenaWidth() || X < 0) {
             return false;
         }
+        for (Jogador* oponente : jogo.getArena()->getOpponents()) {
+            if (!oponente->morreu && oponente != jogador) {
+                if (X < oponente->getX() + largura && 
+                    X + largura > oponente->getX() && 
+                    Y < oponente->getY() + altura && 
+                    Y + altura > oponente->getY()) {  
+                
+                    return false; // Colisão detectada
+                }
+            }
+        }
 
     } else {
         for (Jogador* oponente : jogo.getArena()->getOpponents()) {
@@ -272,31 +283,26 @@ void updateOpponents(GLdouble timeDiference) {
 }
 int ultimaPosMouseY = 0; 
 void movimentarBracoMouse(int x, int y) {
-    ; // Inverter o eixo Y para corresponder ao sistema de coordenadas da tela
 
     Jogador* jogador = jogador_principal;
     GLfloat anguloBraco = jogador->getAngle();
 
-    // Calcular o delta do movimento vertical do mouse
     int deltaY = y - ultimaPosMouseY;
 
-    // Ajustar o ângulo com base no delta, normalizando a velocidade
-    GLfloat anguloIncremento = deltaY * 0.2f; // Fator de escala para controlar a velocidade
+    GLfloat anguloIncremento = deltaY * 0.2f; 
 
-    if (anguloIncremento > 0) { // Movimento para cima
+    if (anguloIncremento > 0) { 
         if (anguloBraco + anguloIncremento < -40) {          
             anguloBraco = jogador->updateAngle(anguloIncremento);
         }
-    } else if (anguloIncremento < 0) { // Movimento para baixo
+    } else if (anguloIncremento < 0) { 
         if (anguloBraco + anguloIncremento >= -130) {          
             anguloBraco = jogador->updateAngle(anguloIncremento);
         }
     }
 
-    // Atualizar a posição anterior do mouse
     ultimaPosMouseY = y;
 
-    // Solicitar redesenho
     glutPostRedisplay();
 }
 
@@ -435,6 +441,7 @@ void idle(void)
     verificaTirosValidos(jogador_principal);
 
     for (Jogador* jogador : jogo.getArena()->getOpponents()) {
+        // jogador->dir = 0;
         Tiro* tiro = jogador->Atira(OPONENTE);
         
         if (tiro) {
@@ -462,8 +469,9 @@ int main(int argc, char** argv) {
     glutInitWindowSize(Width, Height);
     glutCreateWindow("Trabalho 2D");
     // Inicializa o jogo
-    
-    jogo.CarregarArquivoSVG("arena_teste.svg");
+   
+
+    jogo.CarregarArquivoSVG(argv[1]);
     jogo.getArena()->AtualizaCoordenadas();
     visDim = jogo.getArenaHeight();
     jogador_principal = jogo.getArena()->getJogador();

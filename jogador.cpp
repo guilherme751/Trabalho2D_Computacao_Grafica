@@ -3,11 +3,7 @@
 #include <stdio.h>
 #include <random>
 
-GLfloat distanciaEntrePontos(GLfloat x1, GLfloat y1, GLfloat x2, GLfloat y2) {
-    GLfloat dx = x2 - x1;
-    GLfloat dy = y2 - y1;
-    return std::sqrt(dx * dx + dy * dy);
-}
+
 
 void Jogador::DesenhaCirc(GLfloat size, GLfloat R, GLfloat G, GLfloat B) {
     glColor3f(R, G, B);
@@ -39,7 +35,7 @@ void Jogador::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, G
 }
 
 
-void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size, GLfloat angle) {    
+void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat angle) {    
 
     glPushMatrix();
         glTranslatef(x, y+dist2base, 0); 
@@ -88,7 +84,7 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat size, GLfloat angle) 
 
 
 
-void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat size, GLfloat angle) {
+void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat angle) {
     
 
     glPushMatrix();
@@ -140,21 +136,21 @@ void Jogador::updateAngulosPerna(GLfloat dx) {
             this->angle_left_leg1 -= 4*dx;
             this->angle_right_leg1 += 4*dx;
 
+            this->angle_left_leg2 -= 4*dx/6;
+            this->angle_right_leg2 += 4*dx/6;
 
-            // this->angle_left_leg2 -= 1;
-            
-            // this->angle_right_leg2 -= 0.2;
-
-            if (this->angle_left_leg1 < -36 && this->angle_right_leg1 > 36 ) {
+            if (this->angle_left_leg1 < -30 && this->angle_right_leg1 > 30 ) {
                 this->left_leg_up = false;       
             }
         } else {
             
             this->angle_right_leg1 -= 4*dx;
-            // this->angle_right_leg2 -= 0.2;
             this->angle_left_leg1 += 4*dx;
-            // this->angle_left_leg2 -= 0.2;
-            if (this->angle_right_leg1 < -36 && this->angle_left_leg1 > 36 ) {
+
+            this->angle_right_leg2 -= 4*dx/6;
+            this->angle_left_leg2 += 4*dx/6;
+
+            if (this->angle_right_leg1 < -30 && this->angle_left_leg1 > 30 ) {
                 this->left_leg_up  = true;     
             }
 
@@ -172,7 +168,7 @@ GLfloat Jogador::MoveEmX(GLfloat dx, GLdouble timeDiference, bool jump_or_fallin
 
 GLfloat Jogador::MoveEmY(GLfloat dy, GLdouble timeDiference) {
     if (timeDiference > 100)    timeDiference = 1;
-    Jogador::y += dy * timeDiference * this->vel;    
+    Jogador::y += dy * timeDiference * this->vel_pulo;    
     return Jogador::y;  
 }
 

@@ -27,7 +27,7 @@ public:
         this->y = y; 
         this->directionAng = directionAng; 
         // this->vel = 0.037;
-        this->vel = 2*1.5*0.0185;
+        this->vel = 0.06;
         this->desenhado = false;
         this->radius = radiusTiro;
     };

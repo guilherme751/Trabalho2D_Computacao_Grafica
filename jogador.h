@@ -29,6 +29,7 @@ class Jogador {
     GLfloat angle_right_leg1;
     GLfloat angle_left_leg2;
     GLfloat angle_right_leg2;
+    bool primeiraMetade = true;
 
     
     
@@ -37,13 +38,14 @@ class Jogador {
         void DesenhaCirc(GLfloat size, 
                         GLfloat R, GLfloat G, GLfloat B);
         void DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B);
-        void DesenhaJogador(GLfloat x, GLfloat y, GLfloat size, GLfloat angle);
-        void DesenhaOponente(GLfloat x, GLfloat y, GLfloat size, GLfloat angle);
+        void DesenhaJogador(GLfloat x, GLfloat y, GLfloat angle);
+        void DesenhaOponente(GLfloat x, GLfloat y, GLfloat angle);
         Tiro* AtiraOponente();
         Tiro* AtiraJogador();
 
     public:
         GLfloat vel;
+        GLfloat vel_pulo;
         int dir;
         bool oponente;
         bool morreu;
@@ -67,17 +69,18 @@ class Jogador {
             this->x_init = x;
             this->y_init = y;
             this->angle_left_leg1 = 30;
-            this->angle_left_leg2 = 20;
+            this->angle_left_leg2 = 30;
             this->angle_right_leg1 = -30;
             this->angle_right_leg2 = 20;
             this->left_leg_up = true;
-            this->vel = 1.5*0.0185;
+            this->vel = 0.03;
+            this->vel_pulo = 0.0185;
         }
         void Desenha(int tipo) {
             if (tipo == JOGADOR)
-                DesenhaJogador(this->x, this->y, this->size, this->angle);
+                DesenhaJogador(this->x, this->y, this->angle);
             else if (tipo == OPONENTE) {
-                DesenhaOponente(this->x, this->y, this->size, this->angle);
+                DesenhaOponente(this->x, this->y, this->angle);
             }
         }
         GLfloat MoveEmX(GLfloat dx, GLdouble timeDiference, bool jump_or_falling);
