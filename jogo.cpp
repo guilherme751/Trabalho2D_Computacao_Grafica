@@ -3,7 +3,9 @@
 
 using namespace tinyxml2;
 
-
+/**
+ * Faz o parse do documento SVG
+*/
 void Jogo::CarregarArquivoSVG(const char* caminho) {
     XMLDocument doc;
 
@@ -64,7 +66,9 @@ void Jogo::CarregarArquivoSVG(const char* caminho) {
 
     }
 }
-
+/**
+ * Desenha o jogo
+*/
 void Jogo::DesenhaJogo(Arena* arena) {
     if (teste)  arena->teste = true;
     if (arena) {

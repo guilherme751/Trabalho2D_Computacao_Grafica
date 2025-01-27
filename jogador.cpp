@@ -4,7 +4,9 @@
 #include <random>
 
 
-
+/**
+ * Desenha um círculo
+*/
 void Jogador::DesenhaCirc(GLfloat size, GLfloat R, GLfloat G, GLfloat B) {
     glColor3f(R, G, B);
     glBegin(GL_POLYGON);
@@ -23,7 +25,10 @@ void Jogador::DesenhaCirc(GLfloat size, GLfloat R, GLfloat G, GLfloat B) {
 
     glEnd();
 }
-
+/**
+ * Desenha um retângulo.
+ * A origem esta no meio do lado inferior
+*/
 void Jogador::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B) {
     glColor3f(R, G, B);
     glBegin(GL_QUADS);
@@ -34,18 +39,20 @@ void Jogador::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, G
     glEnd(); 
 }
 
-
+/**
+ * Desenha o jogador.
+*/
 void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat angle) {    
 
     glPushMatrix();
-        glTranslatef(x, y+dist2base, 0); 
+        glTranslatef(x, y+dist2base, 0);  // translada para a posição x e y somada a distância para o chão.
 
 
         glPushMatrix();
-            glTranslatef(0, -total_size + dim_proporcional/2, 0); 
+            glTranslatef(0, -total_size + dim_proporcional/2, 0);   //translada para a altura da cabeça
             DesenhaCirc(dim_proporcional, 0, 255, 0);  // desenha a cabeça
 
-            glTranslatef(0,  dim_proporcional/2, 0);
+            glTranslatef(0,  dim_proporcional/2, 0);    
             DesenhaRect(bodyHeight, bodyWidth, 0, 255, 0); // desenha o tronco
 
 
@@ -83,7 +90,9 @@ void Jogador::DesenhaJogador(GLfloat x, GLfloat y, GLfloat angle) {
 }
 
 
-
+/**
+ * Desenha o oponente da mesma forma que o jogador, a diferença está na cor do personagem.
+*/
 void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat angle) {
     
 
@@ -130,7 +139,9 @@ void Jogador::DesenhaOponente(GLfloat x, GLfloat y, GLfloat angle) {
 
     glPopMatrix();
 }
-
+/**
+ * Atualiza os ângulos de rotação da perna, tanto do movimento de quadril quanto de joelho
+*/
 void Jogador::updateAngulosPerna(GLfloat dx) {    
         if (this->left_leg_up) {
             this->angle_left_leg1 -= 4*dx;
@@ -157,7 +168,9 @@ void Jogador::updateAngulosPerna(GLfloat dx) {
         }   
 
 }
-
+/**
+ * Move em X
+*/
 GLfloat Jogador::MoveEmX(GLfloat dx, GLdouble timeDiference, bool jump_or_falling) {
     if (timeDiference > 100)    timeDiference = 1;
     if (!jump_or_falling)
@@ -165,20 +178,27 @@ GLfloat Jogador::MoveEmX(GLfloat dx, GLdouble timeDiference, bool jump_or_fallin
     Jogador::x += dx * timeDiference * this->vel;
     return Jogador::x;  
 }
-
+/**
+ * Move em Y
+*/
 GLfloat Jogador::MoveEmY(GLfloat dy, GLdouble timeDiference) {
     if (timeDiference > 100)    timeDiference = 1;
     Jogador::y += dy * timeDiference * this->vel_pulo;    
     return Jogador::y;  
 }
 
+/**
+ * Rotaciona um ponto com base na matriz de rotação.
+*/
 void RotatePoint(GLfloat x, GLfloat y, GLfloat angle, GLfloat &xOut, GLfloat &yOut){
     xOut = cos(angle * M_PI/180)*x - sin(angle * M_PI/180)*y;
     yOut = sin(angle * M_PI/180)*x + cos(angle * M_PI/180)*y;    
 }
 
 
-
+/**
+ * Retorna um objeto Tiro na posição correta a partir dos cálculos fazendo as transformações na ordem invertida.
+*/
 Tiro* Jogador::AtiraJogador() {
     
 
@@ -206,10 +226,13 @@ std::random_device rd;  // Fonte de aleatoriedade
 std::mt19937 gen(rd()); // Gerador de números aleatórios
 std::uniform_real_distribution<float> dist(0.0, 1.0); 
 
-Tiro* Jogador::AtiraOponente() {
+/** 
+ * Retorna o objeto Tiro do oponente
+*/
+Tiro* Jogador::AtiraOponente(GLfloat prob_tiro) {
     
     float randomNumber = dist(gen);
-    if (randomNumber < 0.05 && this->oponente_dentro_visao && !this->morreu) {
+    if (randomNumber < prob_tiro && this->oponente_dentro_visao && !this->morreu) {
     
         GLfloat baseX = 0, baseY = 0;
         RotatePoint(baseX, baseY, angle, baseX, baseY);
@@ -235,23 +258,36 @@ Tiro* Jogador::AtiraOponente() {
     }
 }
 
+/**
+ * Desenha todos os tiros da lista de tiros
+*/
 void Jogador::DesenhaTiros(){
     for (Tiro* tiro : tiros) {       
         tiro->Desenha();       
     }
 }
-
+/**
+ * Atualiza todos os tiros da lista de tiros
+*/
 void Jogador::UpdateTiros(GLfloat timeDifference) {
 
     for (Tiro* tiro : tiros) {
         tiro->Move(timeDifference);
     }
 }
+/**
+ * Mantêm o ângulo entre 0 e 360 graus
+*/
 GLfloat normalizaAngulo(GLfloat angulo) {
     while (angulo < 0) angulo += 360;
     while (angulo >= 360) angulo -= 360;
     return angulo;
 }
+
+/**
+ * Atualiza o ângulo de rotação do braço do oponente. O braço do oponente sempre aponta para a posição do jogador.
+ * O oponente só irá mexer o braço se ele estiver vendo o jogador.
+*/
 void Jogador::updateAngleOponente(Jogador* jogador_principal, GLfloat view_width) {
     if (this->x - jogador_principal->x  <= view_width/1.9) {
             this->oponente_dentro_visao = true;

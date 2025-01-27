@@ -1,8 +1,11 @@
 #include "obstaculo.h"
 #include <stdio.h>
 
-
-void Obstaculo::DesenhaRectVertical(GLfloat height, GLfloat width,
+/**
+ * Desenha um retângulo.
+ * A origem está no vértice inferior esquerdo.
+*/
+void Obstaculo::DesenhaRect(GLfloat height, GLfloat width,
                         GLfloat R, GLfloat G, GLfloat B) {
     
     glColor3f(R, G, B);
@@ -15,15 +18,16 @@ void Obstaculo::DesenhaRectVertical(GLfloat height, GLfloat width,
     glEnd();  
 
 }
-
+/**
+ * Desenha o obstáculo
+*/
 void Obstaculo::DesenhaObstaculo(GLfloat x, GLfloat y, GLfloat height, GLfloat width,
                         GLfloat R, GLfloat G, GLfloat B) {
 
     
     glPushMatrix();
         glTranslatef(x, y, 0);
-        // glRotatef(180, 1, 0, 0);
-        DesenhaRectVertical(height, width, R, G, B);
+        DesenhaRect(height, width, R, G, B);
     glPopMatrix();
 
     

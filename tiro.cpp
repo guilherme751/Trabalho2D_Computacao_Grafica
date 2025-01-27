@@ -3,6 +3,9 @@
 #include <stdio.h>
 #define DISTANCIA_MAX 500
 
+/**
+ * Desenha um círculo
+*/
 void Tiro::DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B)
 {
     glColor3f(R, G, B);
@@ -24,6 +27,9 @@ void Tiro::DesenhaCirc(GLfloat radius, GLfloat R, GLfloat G, GLfloat B)
 
 }
 
+/**
+ * Desenha um tiro
+*/
 void Tiro::DesenhaTiro(GLfloat x, GLfloat y, GLfloat radius)
 {
     glPushMatrix();
@@ -33,7 +39,10 @@ void Tiro::DesenhaTiro(GLfloat x, GLfloat y, GLfloat radius)
     glPopMatrix();
 
 }
-// (x - gX, y - gY)
+
+/**
+ * Move o tiro com base no vetor direção
+*/
 void Tiro::Move(GLdouble timeDifference)
 {
     

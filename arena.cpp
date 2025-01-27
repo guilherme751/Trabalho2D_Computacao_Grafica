@@ -1,6 +1,10 @@
 #include "arena.h"
 #include <stdio.h>
 
+/**
+ * Desenha um retângulo. 
+ * A origem está no vértice inferior direito.
+*/
 void Arena::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B) {
     glColor3f(R, G, B);
    
@@ -11,7 +15,9 @@ void Arena::DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLf
         glVertex2f(width, height);
     glEnd();  
 }
-
+/**
+ * Desenha a arena. Chama as funções de desenho de todos os elementos e por fim desenha a arena
+*/
 void Arena::DesenhaArena(GLfloat x, GLfloat y, GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B) {
     glPushMatrix();        
         glRotatef(180, 1, 0, 0);
@@ -38,6 +44,14 @@ void Arena::printArena() {
     printf("Altura %f\nLargura: %f\n", this->height, this->width);
 }
 
+/**
+ * Atualiza coordenadas. Função chamada no início para atualizar as posições X e Y dos elementos
+ * com base nas posições X e Y da arena. 
+ * X do elemento -= X da arena
+ * Y do elemento -= Y da arena
+ * X da arena, Y da arena = 0 
+ * Falicita o entendimento das coordenadas. Poderia usar translações também.
+*/
 void Arena::AtualizaCoordenadas() {
     for (Obstaculo* obstaculo : obstaculos) {
         obstaculo->updateX(this->x);

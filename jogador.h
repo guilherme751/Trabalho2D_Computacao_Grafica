@@ -40,7 +40,7 @@ class Jogador {
         void DesenhaRect(GLfloat height, GLfloat width, GLfloat R, GLfloat G, GLfloat B);
         void DesenhaJogador(GLfloat x, GLfloat y, GLfloat angle);
         void DesenhaOponente(GLfloat x, GLfloat y, GLfloat angle);
-        Tiro* AtiraOponente();
+        Tiro* AtiraOponente(GLfloat prob_tiro);
         Tiro* AtiraJogador();
 
     public:
@@ -133,12 +133,12 @@ class Jogador {
         }
 
         
-        Tiro* Atira(int tipo) {
+        Tiro* Atira(int tipo, GLfloat prob_tiro) {
             if (tipo == JOGADOR) {
                 return AtiraJogador();
             }
             else if (tipo == OPONENTE) {
-                return AtiraOponente();
+                return AtiraOponente(prob_tiro);
             }
             return NULL;
         }

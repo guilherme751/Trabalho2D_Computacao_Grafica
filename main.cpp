@@ -10,10 +10,7 @@
 #include "arena.h"
 #include <random>
 
-
-#define INC_KEYIDLE 0.5
 // Window dimensions
-
 const GLint Width = 500;
 const GLint Height = 500;
 GLfloat visDim;
@@ -25,7 +22,13 @@ GLfloat positionBeforeJump;
 Tiro* tiro = NULL;
 int keyStatus[256];
 
+// configurações para apresentação
+GLfloat prob_tiro = 0.04;
+bool mov_oponente = true;
 
+/**
+ * Identifica quando uma tecla é pressionada
+*/
 void keyPress(unsigned char key, int x, int y) {
     switch (key) { 
         case 'a':
@@ -43,19 +46,26 @@ void keyPress(unsigned char key, int x, int y) {
     }
     glutPostRedisplay();
 }
-
+/**
+ * Identifica quando uma tecla é solta 
+*/
 void keyup(unsigned char key, int x, int y) {
     keyStatus[(int)(key)] = 0;
     glutPostRedisplay();
 }
-
+/**
+ * Reinicia o status das teclas
+*/
 void ResetKeyStatus() {
     int i;
     // Initialize keyStatus
     for (i = 0; i < 256; i++)
         keyStatus[i] = 0;
 }
-
+/**
+ * Checa Colisão do tiro com os obstáculos do mapa.
+ * Retorna true se encontrar colisão
+*/
 bool checkCollisionObstaculoTiro(Tiro* tiro, Obstaculo* obstaculo) {
     GLfloat cx = tiro->getX(), cy = tiro->getY(), rx = obstaculo->x, ry = obstaculo->y, radius = tiro->radius;
 
@@ -66,6 +76,12 @@ bool checkCollisionObstaculoTiro(Tiro* tiro, Obstaculo* obstaculo) {
     
     return false;
 }
+
+/**
+ * Checa Colisão do tiro com o jogador do mapa.
+ * Retorna true se encontrar colisão
+*/
+
 bool checkCollisionJogadorTiro(Tiro* tiro) {
     GLfloat cx = tiro->getX(), cy = tiro->getY(), rx = jogador_principal->getX(), ry = jogador_principal->getY(), radius = tiro->radius;
 
@@ -76,6 +92,11 @@ bool checkCollisionJogadorTiro(Tiro* tiro) {
     
     return false;
 }
+
+/**
+ * Checa Colisão do tiro com os oponentes do mapa.
+ * Retorna true se encontrar colisão
+*/
 bool checkCollisionOponenteTiro(Tiro* tiro, Jogador* oponente) {
     GLfloat cx = tiro->getX(), cy = tiro->getY(), rx = oponente->getX(), ry = oponente->getY(), radius = tiro->radius;
     if (oponente->morreu)   return false;
@@ -86,6 +107,14 @@ bool checkCollisionOponenteTiro(Tiro* tiro, Jogador* oponente) {
     
     return false;
 }
+/**
+ * Verifica se é um tiro válido. 
+ * Para ser válido, o tiro deve: 
+ * 1) Estar dentro das dimensões da arena
+ * 2) Não ter colisão com um obstáculo
+ * 3) Não ter clisão com o jogador ou um oponente
+ * Se o tiro for inválido, retorna false
+*/
 bool tiroValido(Tiro* tiro, Jogador* j)
 {
     if (!tiro)  return false;
@@ -117,10 +146,12 @@ bool tiroValido(Tiro* tiro, Jogador* j)
 
     return true;
 }
-
+/**
+ * Passa pela lista de tiros do jogador ou oponente e vê se todos são válidos. 
+ * Se encontrar um tiro inválido, esse será excluído
+*/
 void verificaTirosValidos(Jogador* j) {
     std::list<Tiro*>& tiros = j->getTiros();
-    // printf("%ld\n", tiros.size()); 
     for (auto it = tiros.begin(); it != tiros.end(); ) {
         if (!tiroValido(*it, j)) { 
             delete *it;         
@@ -131,7 +162,10 @@ void verificaTirosValidos(Jogador* j) {
     }
 }
 
-
+/**
+ * Checa colisão entre o jogador e os obstáculos, os oponentes e as dimensões do mapa.
+ * Faz o mesmo para os oponentes.
+*/
 bool checkCollision(Jogador* jogador, float incX, float incY) {
     std::vector<Obstaculo*> obstaculos = jogo.getArena()->getObstaculos();
 
@@ -152,7 +186,7 @@ bool checkCollision(Jogador* jogador, float incX, float incY) {
             return false; // Colisão detectada
         }
     }
-    if (Y + altura -INC_KEYIDLE> jogo.getArena()->getHeight() || Y < 0) {
+    if (Y + altura - 0.5> jogo.getArena()->getHeight() || Y < 0) {
         return false;
     }
     if (jogador != jogador_principal) {
@@ -197,10 +231,14 @@ bool checkCollision(Jogador* jogador, float incX, float incY) {
 
     return true; 
 }
+// flags para ajudar no pulo
 bool wayup, falling = false;
-float inc = INC_KEYIDLE;
 
-
+/**
+ * Função de callback do click do mouse para identificar que deve ser feito uma ação de pulo
+ * O pulo corresponde a subida e a descida. As variáveis isJumping e wayup controlam isso. 
+ * O pulo ocorre até o usuário soltar o botão direito do mouse ou atingir a altura de 3 vezes o tamanho do jogador.
+*/
 void mouseCallback(int button, int state, int x, int y) {
     
         if (button == GLUT_RIGHT_BUTTON) {
@@ -215,16 +253,20 @@ void mouseCallback(int button, int state, int x, int y) {
                 } 
             } else if (state == GLUT_UP) {
                 wayup = false;
-                inc = INC_KEYIDLE;
             }
         } else if (button == GLUT_LEFT_BUTTON) {
             if (state == GLUT_DOWN)
-                jogador_principal->addTiro(jogador_principal->Atira(JOGADOR));
+                jogador_principal->addTiro(jogador_principal->Atira(JOGADOR, prob_tiro));
         }
 
         glutPostRedisplay();
     
 }
+/**
+ * Atualiza a posição do jogador em Y quando há um pulo. 
+ * Verifica se há uma colisão com os pés do jogador, caso não haja, significa que o jogador está no ar e portanto deve iniciar
+ * um movimento de queda. (Ao cair de obstáculos por exemplo). A variável falling controla isso.
+*/
 void updatePlayer(GLdouble timeDiference, GLfloat dy) {
     if (isJumping) {
         if (wayup) {
@@ -261,20 +303,24 @@ void updatePlayer(GLdouble timeDiference, GLfloat dy) {
     
 }
 
+/**
+ * Atualiza a posição X dos oponentes. Eles mudam de sentido sempre que encontrarem uma colisão na direita ou esquerda. 
+ * Também mudam de sentido se não tiver mais colisão com os pés deles.
+*/
 void updateOpponents(GLdouble timeDiference) {
     
     std::vector<Jogador*> oponentes = jogo.getArena()->getOpponents();
-    for (Jogador* opponent : oponentes) {        
-        if (!opponent->morreu) {
-            if (!checkCollision(opponent, opponent->dir*timeDiference*opponent->vel, 0)){
-                opponent->dir *= -1;
+    for (Jogador* oponente : oponentes) {        
+        if (!oponente->morreu) {
+            if (!checkCollision(oponente, oponente->dir*timeDiference*oponente->vel, 0)){
+                oponente->dir *= -1;
             }
 
-            if (checkCollision(opponent, 0, 2*INC_KEYIDLE)) {
-                opponent->dir *= -1;
+            if (checkCollision(oponente, 0, 1)) {
+                oponente->dir *= -1;
             }
-            
-            opponent->MoveEmX(opponent->dir, timeDiference*0.5, isJumping || falling);
+            if (mov_oponente)
+                oponente->MoveEmX(oponente->dir, timeDiference*0.5, isJumping || falling);
            
         }
         
@@ -282,6 +328,11 @@ void updateOpponents(GLdouble timeDiference) {
     
 }
 int ultimaPosMouseY = 0; 
+
+/**
+ * Movimento do braço do jogador com base no movimento do mouse. O ângulo varia entre -40 e -130 graus. 
+ * A posição inicial do braço é em 85. Isso permite o jogador mexer o braõ 45 graus para cima ou para baixo.
+*/
 void movimentarBracoMouse(int x, int y) {
 
     Jogador* jogador = jogador_principal;
@@ -306,13 +357,19 @@ void movimentarBracoMouse(int x, int y) {
     glutPostRedisplay();
 }
 
-
+/**
+ * Renderiza um texto na tela, com uma determinada fonte (vide documentação do OPENGL)
+*/
 void renderText(float x, float y, const char* text, void* font) {
     glRasterPos2f(x, y);
     for (int i = 0; text[i] != '\0'; i++) {
         glutBitmapCharacter(font, text[i]);
     }
 }
+
+/**
+ * Reinicia o jogo. Volta todos os elementos para suas posições iniciais.
+*/
 void reiniciarJogo() {
     for (Jogador* oponente : jogo.getArena()->getOpponents()) {
         oponente->reiniciaPosicao();
@@ -321,6 +378,9 @@ void reiniciarJogo() {
     jogadorX = jogador_principal->getX();
 
 }
+/**
+ * Tela de fim de jogo. Mostra a tela correta, caso seja vitória ou derrota. Chama a função para reiniciar jogo.
+*/
 void gameOver(bool vitoria) {
     if (vitoria) {
         glColor3f(0.0f, 1.0f, 0.0f); 
@@ -345,6 +405,9 @@ void gameOver(bool vitoria) {
 
 }
 
+/**
+ * Pontuação do jogo que mantêm a contagem de quantos inimigos estão vivos.
+*/
 void pontuacao() {
     char buffer[100];
     glColor3f(255, 255, 255);
@@ -353,6 +416,9 @@ void pontuacao() {
 
     renderText(jogador_principal->getX(), -5, buffer, GLUT_BITMAP_9_BY_15); 
 }
+/**
+ * Movimenta a câmera de acordo com a posição X do jogador.
+*/
 void updateCameraView()
 {
     glMatrixMode(GL_MODELVIEW); // Switch to the model-view matrix
@@ -360,6 +426,10 @@ void updateCameraView()
 
     glTranslatef(-jogadorX, 0, 0);
 }
+
+/**
+ * Desenha todos os elementos na tela
+*/
 void display() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Limpa a tela
     updateCameraView();
@@ -381,7 +451,10 @@ void display() {
 }
 
 
-
+/**
+ * Inicializa funções básicas do OPENGL. 
+ * Chama o glOrtho para ajustar a janela de visualização que é do tamanho da altura da arena.
+*/
 void init(void)
 {
     
@@ -402,7 +475,17 @@ void init(void)
     glLoadIdentity();
 }
 
-
+/**
+ * Função que é chamada a todo momento. Faz diversas verificações e ações.
+ * 1) Calcula o tempo entre uma chamada e outra para passar para as funções de movimento para que o jogo não
+ * dependa do processador do computador. 
+ * 2) Verifica se as teclas 'a', 'd' e 'r' foram pressionadas para movimentar o jogador para esquerda, para direita
+ * e reiniciar o jogo (caso o jogo tenha acabado) respectivamente.
+ * 3) Atualiza os tiros do jogador
+ * 4) Atualiza os tiros dos oponentes e faz eles atirarem aleatoriamente
+ * 5) Chama funções que atualizam as posições dos elementos
+ * 6) Verifica se o jogador morreu
+*/
 void idle(void)
 {
 
@@ -440,16 +523,15 @@ void idle(void)
     jogador_principal->UpdateTiros(timeDiference);
     verificaTirosValidos(jogador_principal);
 
-    for (Jogador* jogador : jogo.getArena()->getOpponents()) {
-        // jogador->dir = 0;
-        Tiro* tiro = jogador->Atira(OPONENTE);
+    for (Jogador* oponente : jogo.getArena()->getOpponents()) {
+        Tiro* tiro = oponente->Atira(OPONENTE, prob_tiro);
         
         if (tiro) {
-            jogador->addTiro(tiro);
+            oponente->addTiro(tiro);
         }
-        jogador->updateAngleOponente(jogador_principal, jogo.getArenaHeight());
-        jogador->UpdateTiros(timeDiference);
-        verificaTirosValidos(jogador);
+        oponente->updateAngleOponente(jogador_principal, jogo.getArenaHeight());
+        oponente->UpdateTiros(timeDiference);
+        verificaTirosValidos(oponente);
     }
 
     updatePlayer(timeDiference, inc);
@@ -464,12 +546,13 @@ void idle(void)
 }
 
 int main(int argc, char** argv) {
+    // inicialização padrão do openGL
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(Width, Height);
     glutCreateWindow("Trabalho 2D");
-    // Inicializa o jogo
-   
+
+    // Inicializa o jogo  
 
     jogo.CarregarArquivoSVG(argv[1]);
     jogo.getArena()->AtualizaCoordenadas();
@@ -483,10 +566,8 @@ int main(int argc, char** argv) {
     glutIdleFunc(idle);
     glutKeyboardUpFunc(keyup); 
     glutMouseFunc(mouseCallback);  
-    glutPassiveMotionFunc(movimentarBracoMouse);
-   
+    glutPassiveMotionFunc(movimentarBracoMouse);   
     glutMotionFunc(movimentarBracoMouse); 
-    // glutTimerFunc(0, timer, 0);
     init();
     glutMainLoop();
     return 0;
